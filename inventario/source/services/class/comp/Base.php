@@ -6,13 +6,14 @@ class class_Base
 	function __construct() {
 		require('Conexion.php');
 		
+		date_default_timezone_set("America/Argentina/Buenos_Aires");
+		
 		$aux = new mysqli_driver;
 		$aux->report_mode = MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT;
 		
 		$this->mysqli = new mysqli("$servidor", "$usuario", "$password", "$base");
 		$this->mysqli->query("SET NAMES 'utf8'");
-		
-		set_time_limit(120);
+
 	}
 	
   public function toJson($paramet, &$opciones = null) {

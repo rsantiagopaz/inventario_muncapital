@@ -70,26 +70,20 @@ qx.Class.define("inventario.comp.windowVerificar",
 	
 	
 	
-	var menu = new componente.comp.ui.ramon.menu.Menu();
+	var menuItems = new componente.comp.ui.ramon.menu.Menu();
 	
-	var btnEliminar = new qx.ui.menu.Button("Eliminar");
-	btnEliminar.setEnabled(false);
-	btnEliminar.addListener("execute", function(e){
-		var focusedRow = tblSal.getFocusedRow();
-		var rowData = tableModelSal.getRowDataAsMap(focusedRow);
-		
-		tblSal.blur();
-		
-		tableModelSal.removeRows(focusedRow, 1);
-		if (rowData.id_hoja_cargo_item != null) arrayEliminar.push(rowData.id_hoja_cargo_item);
-		
-		var rowCount = tableModelSal.getRowCount();
-		focusedRow = (focusedRow > rowCount - 1) ? rowCount - 1 : focusedRow;
-		tblSal.setFocusedCell(0, focusedRow, true);
-		tblSal.focus();
+	var commandEditar = new qx.ui.command.Command("F2");
+	commandEditar.setEnabled(false);
+	commandEditar.addListener("execute", function(e){
+		tblSal.setFocusedCell(2, tblSal.getFocusedRow(), true);
+		tblSal.startEditing();
 	});
-	menu.add(btnEliminar);
-	menu.memorizar();
+	
+	
+	var btnEditar = new qx.ui.menu.Button("Editar", null, commandEditar);
+	
+	menuItems.add(btnEditar);
+	menuItems.memorizar();
 	
 	
 	
@@ -101,6 +95,7 @@ qx.Class.define("inventario.comp.windowVerificar",
 	tableModelSal.setColumnSortable(0, false);
 	tableModelSal.setColumnSortable(1, false);
 	tableModelSal.setColumnSortable(2, false);
+	
 	tableModelSal.setColumnEditable(2, true);
 	tableModelSal.addListener("dataChanged", function(e){
 		var rowCount = tableModelSal.getRowCount();
@@ -117,8 +112,11 @@ qx.Class.define("inventario.comp.windowVerificar",
 	tblSal.setShowCellFocusIndicator(true);
 	tblSal.toggleColumnVisibilityButtonVisible();
 	//tblSal.toggleStatusBarVisible();
-	tblSal.setContextMenu(menu);
+	tblSal.setContextMenu(menuItems);
 	tblSal.edicion = "edicion_vertical";
+	tblSal.addListener("cellDbltap", function(e){
+		commandEditar.execute();
+	});
 	
 	var tableColumnModelSal = tblSal.getTableColumnModel();
 	
@@ -135,8 +133,8 @@ qx.Class.define("inventario.comp.windowVerificar",
 	selectionModelSal.setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);
 	selectionModelSal.addListener("changeSelection", function(e){
 		var selectionEmpty = selectionModelSal.isSelectionEmpty();
-		btnEliminar.setEnabled(! selectionEmpty);
-		menu.memorizar([btnEliminar]);
+		commandEditar.setEnabled(! selectionEmpty);
+		menuItems.memorizar([commandEditar]);
 	});
 
 	gbx.add(tblSal);
@@ -182,7 +180,7 @@ qx.Class.define("inventario.comp.windowVerificar",
 			p.model = qx.util.Serializer.toNativeObject(controllerForm1.getModel());
 			p.bien = tableModelSal.getDataAsMapArray();
 			
-			alert(qx.lang.Json.stringify(p, null, 2));
+			//alert(qx.lang.Json.stringify(p, null, 2));
 							
 			var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Inventario");
 			rpc.addListener("completed", function(e){
@@ -190,7 +188,7 @@ qx.Class.define("inventario.comp.windowVerificar",
 				
 				btnCancelar.execute();
 				
-				this.fireDataEvent("aceptado", data);
+				this.fireDataEvent("aceptado", data.result);
 			}, this);
 			rpc.callAsyncListeners(true, "verificar_hoja_cargo", p);
 

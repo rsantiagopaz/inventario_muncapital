@@ -8,6 +8,7 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 		
 		this.setLabel('Hoja movimiento');
 		this.setLayout(new qx.ui.layout.Canvas());
+		this.setShowCloseButton(true);
 		
 	this.addListenerOnce("appear", function(e){
 		functionActualizar();
@@ -20,21 +21,27 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 	var rowHoja_cargo;
 	
 	
-	var functionActualizar = function(id_hoja_cargo) {
+	var functionActualizar = function(id_hoja_movimiento) {
+		
+		tbl.blur();
+		tbl.setFocusedCell();
 		
 		var p = {};
-		
 
 		var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Inventario");
 		rpc.addListener("completed", function(e){
 			var data = e.getData();
 			
-			alert(qx.lang.Json.stringify(data, null, 2));
+			//alert(qx.lang.Json.stringify(id_hoja_movimiento, null, 2));
 			
 			tableModel.setDataAsMapArray(data.result, true);
 			
-			if (id_hoja_cargo) {
-				tbl.buscar("id_hoja_cargo", id_hoja_cargo);
+			if (id_hoja_movimiento) {
+				tbl.blur();
+				tbl.setFocusedCell();
+		
+				tbl.buscar("id_hoja_movimiento", id_hoja_movimiento);
+				tbl.focus();
 			}
 		}, this);
 		rpc.addListener("failed", function(e){
@@ -56,8 +63,14 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 	
 	var btnAlta = new qx.ui.menu.Button("Nueva...");
 	btnAlta.addListener("execute", function(e){
-		var win = new inventario.comp.windowHoja_cargo();
+		var win = new inventario.comp.windowHoja_movimiento();
 		win.setModal(true);
+		win.addListener("aceptado", function(e){
+			var data = e.getData();
+			
+			functionActualizar(data);
+		});
+		
 		application.getRoot().add(win);
 		win.center();
 		win.open();
@@ -73,7 +86,7 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 	
 
 		var tableModel = new qx.ui.table.model.Simple();
-		tableModel.setColumns(["F.movimiento", "Uni.presu. destino", "Uni.presu. origen", "Expte.autoriza", "U.movimiento", "Tipo"], ["fecha_movimiento", "uni_presu_destino_descrip", "uni_presu_origen_descrip", "expte_autoriza", "usuario_movimiento", "tipo_movimiento"]);
+		tableModel.setColumns(["F.movimiento", "Uni.presu.", "Expte.autoriza", "U.movimiento", "Tipo"], ["fecha_movimiento", "uni_presu_descrip", "expte_autoriza", "usuario_movimiento", "tipo_movimiento"]);
 
 		var custom = {tableColumnModel : function(obj) {
 			return new qx.ui.table.columnmodel.Resize(obj);
@@ -86,7 +99,7 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 		tbl.setContextMenu(menu);
 
 		tbl.addListener("cellDbltap", function(e){
-			btnModificar.execute();
+			
 		});
 		
 		
@@ -96,13 +109,19 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 		//renderer.setNumberFormat(application.numberformatMontoEs);
 		//tableColumnModel.setDataCellRenderer(4, renderer);
 		
+		
+		var cellrendererDate = new qx.ui.table.cellrenderer.Date();
+		cellrendererDate.setDateFormat(new qx.util.format.DateFormat("y-MM-dd HH:mm:ss"));
+		tableColumnModel.setDataCellRenderer(0, cellrendererDate);
+		
+		
 		var cellrendererReplace = new qx.ui.table.cellrenderer.Replace;
 		cellrendererReplace.setReplaceMap({
 			"A" : "Alta",
 			"M" : "Movimiento",
 			"B" : "Baja"
 		});
-		tableColumnModel.setDataCellRenderer(5, cellrendererReplace);
+		tableColumnModel.setDataCellRenderer(4, cellrendererReplace);
 
 
 		

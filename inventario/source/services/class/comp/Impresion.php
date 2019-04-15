@@ -596,8 +596,14 @@ break;
 
 case 'imprimir_codigo': {
 	
-$id_bien = json_decode($_REQUEST['id_bien']);
-$sql = "SELECT * FROM bien WHERE id_bien IN(" . implode(", ", $id_bien) . ")";
+
+if (isset($_REQUEST['id_hoja_cargo'])) {
+	$sql = "SELECT bien.*, hoja_cargo_item.descrip FROM bien INNER JOIN hoja_cargo_item USING(id_hoja_cargo_item) WHERE id_hoja_cargo=" . $_REQUEST['id_hoja_cargo'];
+} else {
+	$id_bien = json_decode($_REQUEST['id_bien']);
+	$sql = "SELECT * FROM bien WHERE id_bien IN(" . implode(", ", $id_bien) . ")";	
+}
+
 $rs = $mysqli->query($sql);
 
 ?>
@@ -617,8 +623,9 @@ $rs = $mysqli->query($sql);
 while ($row = $rs->fetch_object()) {
 ?>
 	<tr><td><?php echo "Descripción: " . $row->descrip ?></td><td><?php echo "Nro.serie: " . $row->nro_serie ?></td></tr>
+	<tr><td>&nbsp;</td></tr>
 	<tr><td>Código de barras</td><td>Código QR</td></tr>
-	<tr><td><img src="barcode.php?code=<?php echo $row->codigo_barra ?>" /></td><td><img src="qrcode.php?code=<?php echo $row->codigo_qr ?>" /></td></tr>
+	<tr><td><img src="barcode.php?code=<?php echo $row->id_bien ?>" /></td><td><img src="qrcode.php?code=<?php echo $row->codigo_qr ?>" /></td></tr>
 	<tr><td colspan="6"><hr></td></tr>
 <?php
 }

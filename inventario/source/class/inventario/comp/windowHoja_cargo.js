@@ -311,15 +311,15 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 				p.eliminar = arrayEliminar;
 				p.agregar = arrayAgregar;
 				
-				alert(qx.lang.Json.stringify(p, null, 2));
+				//alert(qx.lang.Json.stringify(p, null, 2));
 								
 				var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Inventario");
 				rpc.addListener("completed", function(e){
 					var data = e.getData();
 					
-					btnCancelar.execute();
+					this.fireDataEvent("aceptado", data.result);
 					
-					this.fireDataEvent("aceptado", data);
+					btnCancelar.execute();
 				}, this);
 				rpc.callAsyncListeners(true, "alta_modifica_hoja_cargo", p);
 			}

@@ -61,31 +61,29 @@ qx.Class.define("inventario.Application",
       
       // Document is the application root
       var doc = this.getRoot();
+	
       doc.set({blockerColor: '#bfbfbf', blockerOpacity: 0.4});
-
-		var rpc = new qx.io.remote.Rpc();
-		rpc.setTimeout(10000);
-		rpc.setUrl("services/");
-		rpc.setServiceName("comp.turnos.login");
-		try
-		{
-			var params = new Object();
-			params.version = "3.1.449";
-			var result = rpc.callSync("Logueado", params);
-			if (!result) {
-				inventario.Application.Login("Identificacion de Usuario", "", this._InitAPP, this);
-			} else {
-				//alert(qx.lang.Json.stringify(result, null, 2));
-				
-				this._SYSusuario = result.usuario;
-				this.rowOrganismo_area = result.organismo_area;
-				this._InitAPP();
-			}
-		}
-		catch (ex)
-		{
-			alert(ex);
-		}
+      
+      this.perfil = "063001";
+    
+      
+      var win = new inventario.comp.windowLogin();
+      win.setModal(true);
+      win.addListenerOnce("appear", function(e){
+        win.center();
+      });
+      win.addListener("aceptado", function(e){
+        var data = e.getData();
+        
+        this.rowOrganismo_area = data;
+        alert(qx.lang.Json.stringify(data, null, 2));
+        
+        this._InitAPP();
+      }, this)
+      //doc.add(win);
+      //win.center();
+      win.open();
+      
     },
 	_InitAPP : function ()
 	{
@@ -114,8 +112,7 @@ qx.Class.define("inventario.Application",
 	var contenedorMain = new qx.ui.container.Composite(new qx.ui.layout.Grow());
 	var tabviewMain = this._tabviewMain = new qx.ui.tabview.TabView();
 	
-	var pagePrincipal = this._pagePrincipal = new inventario.comp.pagePrincipal();
-	//tabviewMain.add(pagePrincipal);
+	var page = {};
 	
 	contenedorMain.add(tabviewMain);
 	
@@ -156,17 +153,6 @@ qx.Class.define("inventario.Application",
 	
 	var mnuEdicion = new qx.ui.menu.Menu();
 	
-	var btnAlta = new qx.ui.menu.Button("Alta...");
-	btnAlta.addListener("execute", function(e){
-		var win = new inventario.comp.windowHoja_cargo();
-		win.setModal(true);
-		doc.add(win);
-		win.center();
-		win.open();
-	}, this);
-	mnuEdicion.add(btnAlta);
-	mnuEdicion.addSeparator();
-	
 	var btnParametros = new qx.ui.menu.Button("Parámetros...");
 	btnParametros.addListener("execute", function(e){
 		var win = new inventario.comp.windowParametro();
@@ -183,15 +169,27 @@ qx.Class.define("inventario.Application",
 	
 	var btnHoja_cargo = new qx.ui.menu.Button("Hoja cargo");
 	btnHoja_cargo.addListener("execute", function(e){
-		var page = new inventario.comp.pageHoja_cargo();
-		tabviewMain.add(page);
+		if (page["pageHoja_cargo"]==null) {
+			page["pageHoja_cargo"] = new inventario.comp.pageHoja_cargo();
+			page["pageHoja_cargo"].addListenerOnce("close", function(e){
+				page["pageHoja_cargo"] = null;
+			});
+			tabviewMain.add(page["pageHoja_cargo"]);				
+		} 
+		tabviewMain.setSelection([page["pageHoja_cargo"]])
 	}, this);
 	mnuVer.add(btnHoja_cargo);
 	
 	var btnHoja_movimiento = new qx.ui.menu.Button("Hoja movimiento");
 	btnHoja_movimiento.addListener("execute", function(e){
-		var page = new inventario.comp.pageHoja_movimiento();
-		tabviewMain.add(page);
+		if (page["pageHoja_movimiento"]==null) {
+			page["pageHoja_movimiento"] = new inventario.comp.pageHoja_movimiento();
+			page["pageHoja_movimiento"].addListenerOnce("close", function(e){
+				page["pageHoja_movimiento"] = null;
+			});
+			tabviewMain.add(page["pageHoja_movimiento"]);				
+		} 
+		tabviewMain.setSelection([page["pageHoja_movimiento"]])
 	}, this);
 	mnuVer.add(btnHoja_movimiento);
 
