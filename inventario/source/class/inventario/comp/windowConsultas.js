@@ -1,7 +1,7 @@
 qx.Class.define("inventario.comp.windowConsultas",
 {
 	extend : componente.comp.ui.ramon.window.Window,
-	construct : function (appMain)
+	construct : function ()
 	{
 		this.base(arguments);
 
@@ -19,6 +19,7 @@ qx.Class.define("inventario.comp.windowConsultas",
 	});
 	
 	
+	var application = qx.core.Init.getApplication(); 
 	
  
 var rb1 = new qx.ui.form.RadioButton("Inventario tipo bien:");
@@ -70,7 +71,7 @@ rb5.addListener("changeValue", function(e){
 	this.add(rb2, {left: 0, top: 50});
 	
 	//var cboOrganismoAreaOrigen = new componente.comp.ui.ramon.combobox.ComboBoxAuto("services/", "comp.Inventario", "autocompletarOAS", {organismo_area_id: appMain.rowOrganismo_area.organismo_area_id});
-	var cboOrganismoAreaOrigen = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Inventario", methodName: "autocompletarOAS"}, {organismo_area_id: appMain.rowOrganismo_area.organismo_area_id});
+	var cboOrganismoAreaOrigen = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Inventario", methodName: "autocompletarOAS"}, {organismo_area_id: application.login.organismo_area_id});
 	var lstOrganismoAreaOrigen = cboOrganismoAreaOrigen.getChildControl("list");
 	this.add(cboOrganismoAreaOrigen, {left: 130, top: 50, right: 0});
 	
@@ -152,17 +153,17 @@ rb5.addListener("changeValue", function(e){
 			desde = desde.getFullYear() + "-" + qx.lang.String.pad(String(desde.getMonth() + 1), 2, "0") + "-" + qx.lang.String.pad(String(desde.getDate()), 2, "0");
 			hasta = hasta.getFullYear() + "-" + qx.lang.String.pad(String(hasta.getMonth() + 1), 2, "0") + "-" + qx.lang.String.pad(String(hasta.getDate()), 2, "0");
 			if (rb1.getValue()) {
-				window.open("services/class/comp/Impresion.php?rutina=inventario_tipo_bien&organismo_area_id=" + appMain.rowOrganismo_area.organismo_area_id + "&id_tipo_bien=" + slbTipo_bien.getModelSelection().getItem(0));
+				window.open("services/class/comp/Impresion.php?rutina=inventario_tipo_bien&organismo_area_id=" + application.login.organismo_area_id + "&id_tipo_bien=" + slbTipo_bien.getModelSelection().getItem(0));
 			} else if (rb2.getValue()) {
-				window.open("services/class/comp/Impresion.php?rutina=inventario_OAS&organismo_area_id=" + appMain.rowOrganismo_area.organismo_area_id + "&id_organismo_area_servicio=" + lstOrganismoAreaOrigen.getModelSelection().getItem(0) + "&descrip=" + cboOrganismoAreaOrigen.getValue());
+				window.open("services/class/comp/Impresion.php?rutina=inventario_OAS&organismo_area_id=" + application.login.organismo_area_id + "&id_organismo_area_servicio=" + lstOrganismoAreaOrigen.getModelSelection().getItem(0) + "&descrip=" + cboOrganismoAreaOrigen.getValue());
 			} else if (rb3.getValue()) {
-				window.open("services/class/comp/Impresion.php?rutina=inventario_hospital&organismo_area_id=" + appMain.rowOrganismo_area.organismo_area_id + "&descrip=" + appMain.rowOrganismo_area.organismo_area_descrip);
+				window.open("services/class/comp/Impresion.php?rutina=inventario_hospital&organismo_area_id=" + application.login.organismo_area_id + "&descrip=" + application.login.organismo_area_descrip);
 			} else if (rb4.getValue()) {
-				window.open("services/class/comp/Impresion.php?rutina=listado_ab&organismo_area_id=" + appMain.rowOrganismo_area.organismo_area_id + "&tipo_movimiento=A&desde=" + desde + "&hasta=" + hasta);
+				window.open("services/class/comp/Impresion.php?rutina=listado_ab&organismo_area_id=" + application.login.organismo_area_id + "&tipo_movimiento=A&desde=" + desde + "&hasta=" + hasta);
 			} else if (rb5.getValue()) {
-				window.open("services/class/comp/Impresion.php?rutina=listado_ab&organismo_area_id=" + appMain.rowOrganismo_area.organismo_area_id + "&tipo_movimiento=B&desde=" + desde + "&hasta=" + hasta);
+				window.open("services/class/comp/Impresion.php?rutina=listado_ab&organismo_area_id=" + application.login.organismo_area_id + "&tipo_movimiento=B&desde=" + desde + "&hasta=" + hasta);
 			} else if (rb6.getValue()) {
-				window.open("services/class/comp/Impresion.php?rutina=listado_proveedor&organismo_area_id=" + appMain.rowOrganismo_area.organismo_area_id + "&descrip=" + txtProveedor.getValue());
+				window.open("services/class/comp/Impresion.php?rutina=listado_proveedor&organismo_area_id=" + application.login.organismo_area_id + "&descrip=" + txtProveedor.getValue());
 			}
 		}
 	}, this);

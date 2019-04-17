@@ -64,7 +64,6 @@ qx.Class.define("inventario.Application",
 	
       doc.set({blockerColor: '#bfbfbf', blockerOpacity: 0.4});
       
-      this.perfil = "063001";
     
       
       var win = new inventario.comp.windowLogin();
@@ -75,8 +74,8 @@ qx.Class.define("inventario.Application",
       win.addListener("aceptado", function(e){
         var data = e.getData();
         
-        this.rowOrganismo_area = data;
-        alert(qx.lang.Json.stringify(data, null, 2));
+        this.login = data;
+        //alert(qx.lang.Json.stringify(data, null, 2));
         
         this._InitAPP();
       }, this)
@@ -194,7 +193,7 @@ qx.Class.define("inventario.Application",
 	mnuVer.add(btnHoja_movimiento);
 
 	var btnConsultas = new qx.ui.menu.Button("Consultas");
-	btnConsultas.setEnabled(this.rowOrganismo_area.perfiles["039003"] != null);
+	//btnConsultas.setEnabled(this.login.perfiles["039003"] != null);
 	btnConsultas.addListener("execute", function(e){
 		var window = new inventario.comp.windowConsultas(this);
 		window.setModal(true);
@@ -202,7 +201,17 @@ qx.Class.define("inventario.Application",
 		window.center();
 		window.open();
 	}, this);
-	mnuVer.add(btnConsultas);
+	//mnuVer.add(btnConsultas);
+	
+	var btnListado = new qx.ui.menu.Button("Listado...");
+	btnListado.addListener("execute", function(e){
+		var window = new inventario.comp.windowListado();
+		window.setModal(true);
+		doc.add(window);
+		window.center();
+		window.open();
+	}, this);
+	mnuVer.add(btnListado);
 	
 	
 	var mnuSesion = new qx.ui.menu.Menu();
@@ -238,182 +247,10 @@ qx.Class.define("inventario.Application",
 	
 	doc.add(toolbarMain, {left: 5, top: 2, right: "50%"});
 	
-	doc.add(new qx.ui.basic.Label("Org/Area: " + this.rowOrganismo_area.label), {left: "51%", top: 2});
+	doc.add(new qx.ui.basic.Label("Org/Area: " + this.login.label), {left: "51%", top: 2});
 	doc.add(new qx.ui.basic.Label("Usuario: " + this._SYSusuario), {left: "51%", top: 22});
 	
 	doc.add(contenedorMain, {left: 0, top: 38, right: 0, bottom: 0});
 	}
-  },
-	statics :
-	{
-		Login : function (title, usuario, functionClose, context)
-		{
-			var winLogin = new qx.ui.window.Window(title);
-			winLogin.addListenerOnce("appear", function(e){
-				txtUsuario.focus();
-			});
-			winLogin.addListener("resize", winLogin.center, winLogin);
-			winLogin.set({showMaximize:false, allowMaximize:false, showMinimize:false, showClose:false, modal:true, movable:false, resizable:false, showStatusbar:false});
-			winLogin.setLayout(new qx.ui.layout.Basic());
-			
-			/*
-			var txtUsuario = new qx.ui.form.ow.TextField("Usuario:").set({enabled:true});
-				txtUsuario.getLabel().setWidth(60);
-			var txpPassword = new qx.ui.form.ow.PassField("Password:").set({enabled:true});
-				txpPassword.getLabel().setWidth(60);
-			var lblMSJ = new qx.ui.basic.Label("").set({rich:true, textAlign:'center', visibility:'excluded'});
-			var btnIngresar = new qx.ui.form.Button("Validar Datos");
-			var cmbServicios = new qx.ui.form.ow.ComboBox("Servicio:").set({visibility:'hidden'});
-				cmbServicios.getLabel().setWidth(60);
-				cmbServicios.getCombo().setWidth(500);
-			*/
-			
-			var txtUsuario = new qx.ui.form.TextField("");
-
-			var txpPassword = new qx.ui.form.PasswordField("");
-
-			var lblMSJ = new qx.ui.basic.Label("").set({rich:true, textAlign:'center', visibility:'excluded'});
-			var btnIngresar = new qx.ui.form.Button("Validar Datos");
-			//var cmbServicios = new qx.ui.form.ComboBox().set({visibility:'hidden', width: 400});
-			var cmbServicios = new qx.ui.form.SelectBox().set({visibility:'hidden', width: 400});
-
-			
-			if ((usuario != "") && (usuario != null) && (usuario != undefined))
-			{
-				txtUsuario.setValue(usuario);
-				txtUsuario.setEnabled(false);
-			}
-			
-			txtUsuario.addListener("keydown", function (e)
-			{
-				if (e.getKeyIdentifier() === 'Enter')
-					txpPassword.tabFocus();
-			}, this);
-			
-			txpPassword.addListener("keydown", function (e)
-			{
-				if (e.getKeyIdentifier() === 'Enter')
-					btnIngresar.execute();
-			}, this);
-			
-			winLogin.add(new qx.ui.basic.Label("Usuario:"), {left:0, top:0});
-			winLogin.add(txtUsuario, {left:150, top:0});
-			winLogin.add(new qx.ui.basic.Label("Password:"), {left:0, top:30});
-			winLogin.add(txpPassword, {left:150, top:30});
-			winLogin.add(lblMSJ, {left:200, top:60});
-			winLogin.add(new qx.ui.basic.Label("Servicio:"), {left:0, top:60});
-			winLogin.add(cmbServicios, {left:150, top:60});
-			winLogin.add(btnIngresar, {left:250, top:90});
-			
-			if ((usuario != "") && (usuario != null) && (usuario != undefined))
-			{
-				var btnSalir = new qx.ui.form.Button("Salir e Ingresar con otro Usuario");
-				btnSalir.addListener("execute", function ()
-				{
-					location.reload(true);
-				});
-				winLogin.add(btnSalir);
-			}
-			
-			btnIngresar.addListener("execute", function (e)
-			{
-				var rpc = new qx.io.remote.Rpc();
-				rpc.setTimeout(10000);
-				rpc.setUrl("services/");
-				rpc.setServiceName("comp.turnos.login");
-				var params = new Object();
-				params.usuario = txtUsuario.getValue();
-				params.password = txpPassword.getValue();
-				//params.servicio = cmbServicios.getValue();
-				params.servicio = "";
-				try
-				{
-					if (btnIngresar.getLabel() != "Ingresar")
-					{
-						var result = rpc.callSync("Login", params);
-						
-						//alert(qx.lang.Json.stringify(result, null, 2));
-						
-						if (result.login == true)
-						{
-							txtUsuario.setEnabled(false);
-							txpPassword.setEnabled(false);
-							lblMSJ.setVisibility("excluded");
-							lblMSJ.setValue("");
-							cmbServicios.setVisibility("visible");
-
-							//alert(qx.lang.Json.stringify(result, null, 2));
-							//cmbServicios.setNewValues(result.servicios);
-							//alert(qx.lang.Json.stringify(result.servicios, null, 2));
-							for (var x in result.servicios) {
-								cmbServicios.add(new qx.ui.form.ListItem(result.servicios[x].label, result.servicios[x].icon, result.servicios[x]));
-							}
-							btnIngresar.setLabel("Ingresar");
-						}
-						else
-						{
-							if (result)
-							{
-								cmbServicios.setVisibility("hidden");
-								lblMSJ.setValue("<font color='red'>Ud. no posee permisos para este Sistema.!</font>");
-								lblMSJ.setVisibility("visible");
-							}
-							else
-							{
-								cmbServicios.setVisibility("hidden");
-								lblMSJ.setValue("<font color='red'>Usuario y/o Password incorrecta!</font>");
-								lblMSJ.setVisibility("visible");
-							}
-							if ((usuario != "") && (usuario != null) && (usuario != undefined))
-							{
-								txpPassword.focus();
-							}
-							else
-							{
-								txtUsuario.focus();
-							}
-						}
-					}
-					else
-					{
-						//context.rowOrganismo_area = qx.util.Serializer.toNativeObject(cmbServicios.getChildControl("list").getModelSelection().getItem(0));
-						context.rowOrganismo_area = qx.util.Serializer.toNativeObject(cmbServicios.getModelSelection().getItem(0));
-						
-						params.organismo_area = context.rowOrganismo_area;
-						
-						//alert(qx.lang.Json.stringify(context.rowOrganismo_area, null, 2));
-						
-						var result = rpc.callSync("Ingresar", params);
-
-						context._SYSusuario = txtUsuario.getValue();
-						
-						winLogin.close();
-					}
-				}
-				catch (ex)
-				{
-					lblMSJ.setValue("<font color='red'>Se produjo un error en el Sistema!</font>");
-					alert(ex);
-				}
-			}, this);
-
-			if ((functionClose != "") && (functionClose != null) && (functionClose != undefined))
-			{
-				if (context)
-					winLogin.addListener("close", functionClose, context);
-				else
-					winLogin.addListener("close", functionClose);
-			}
-			
-			winLogin.open();
-			if ((usuario != "") && (usuario != null) && (usuario != undefined))
-			{
-				txpPassword.focus();
-			}
-			else
-			{
-				txtUsuario.focus();
-			}
-		}
-	}
+  }
 });

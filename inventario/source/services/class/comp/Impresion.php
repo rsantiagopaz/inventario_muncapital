@@ -166,52 +166,160 @@ break;
 
 
 
-case 'inventario_hospital': {
+case 'inventario': {
 	
-$sql = "SELECT * FROM bien WHERE organismo_area_id='" . $_REQUEST['organismo_area_id'] . "' ORDER BY descrip";
+
+	?>
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+		<title>Inventario Gral.</title>
+	</head>
+	<body>
+	<input type="submit" value="Imprimir" onClick="window.print();"/>
+	<table border="0" cellpadding="0" cellspacing="0" width="800" align="center">
+	<tr><td align="center" colspan="10"><big><b>Dirección de Compras</b></big></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td align="center" colspan="10"><big><b>Municipalidad de Santiago del Estero</b></big></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td align="center" colspan="10"><big><b>INVENTARIO GRAL.</b></big></td></tr>
+	<tr><td align="center" colspan="10"><big><?php echo date("Y-m-d H:i:s"); ?></big></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<?php
+	
+	if (isset($_REQUEST['id_uni_presu'])) {
+		$sql = "SELECT";
+		$sql.= "  *";
+		$sql.= " FROM uni_presu";
+		$sql.= " WHERE id_uni_presu=" . $_REQUEST['id_uni_presu'];
+		
+		$rsAux = $mysqli->query($sql);
+		$rowAux = $rsAux->fetch_object();
+		
+		?>
+		<tr><td align="center" colspan="6"><big><b><?php echo "Uni.Presu.: " . $rowAux->descrip; ?></b></big></td></tr>
+		<?php
+	}
+	if (isset($_REQUEST['id_tipo_bien'])) {
+		$sql = "SELECT";
+		$sql.= "  *";
+		$sql.= " FROM tipo_bien";
+		$sql.= " WHERE id_tipo_bien=" . $_REQUEST['id_tipo_bien'];
+		
+		$rsAux = $mysqli->query($sql);
+		$rowAux = $rsAux->fetch_object();
+		
+		?>
+		<tr><td align="center" colspan="6"><big><b><?php echo "Tipo bien: " . $rowAux->descrip; ?></b></big></td></tr>
+		<?php
+	}
+	
+	?>
+	<tr><td>&nbsp;</td></tr>
+	<?php
+
+
+
+
+$id_hoja_movimiento = array();
+	
+$sql = "SELECT";
+$sql.= " id_bien";
+$sql.= " FROM bien";
+
 $rsBien = $mysqli->query($sql);
+
+while ($rowBien = $rsBien->fetch_object()) {
+	$sql = "SELECT";
+	$sql.= " id_hoja_movimiento, tipo_movimiento";
+	$sql.= " FROM hoja_movimiento INNER JOIN hoja_movimiento_item USING(id_hoja_movimiento)";
+	$sql.= " WHERE hoja_movimiento_item.id_bien=" . $rowBien->id_bien;
+	$sql.= " ORDER BY id_hoja_movimiento DESC";
+	$sql.= " LIMIT 1";
+	
+	$rsHoja_movimiento = $mysqli->query($sql);
+	
+	if ($rsHoja_movimiento->num_rows > 0) {
+		$rowHoja_movimiento = $rsHoja_movimiento->fetch_object();
+		if ($rowHoja_movimiento->tipo_movimiento != "B") $id_hoja_movimiento[$rowBien->id_bien] = $rowHoja_movimiento->id_hoja_movimiento;
+	}
+}
+
+
+
+$sql = "CREATE TEMPORARY TABLE uni_presu_aux (id_uni_presu INT(11), id_bien INT(11))";
+$mysqli->query($sql);
+
+
+$sql = "SELECT";
+$sql.= " uni_presu.*, hoja_movimiento.id_hoja_movimiento";
+$sql.= " FROM uni_presu INNER JOIN hoja_movimiento USING(id_uni_presu)";
+if (isset($_REQUEST['id_uni_presu'])) {
+	$sql.= " WHERE uni_presu.id_uni_presu=" . $_REQUEST['id_uni_presu'];
+}
+$sql.= " ORDER BY uni_presu.descrip";
+
+$rsUni_presu = $mysqli->query($sql);
+
+while ($rowUni_presu = $rsUni_presu->fetch_object()) {
+	$bandera = false;
+	
+	$sql = "TRUNCATE uni_presu_aux";
+	$mysqli->query($sql);
+	
+	if ($aux = array_keys($id_hoja_movimiento, $rowUni_presu->id_hoja_movimiento)) {
+		foreach ($aux as $id_bien) {
+			$bandera = true;
+			$sql = "INSERT uni_presu_aux SET id_uni_presu=" . $rowUni_presu->id_uni_presu . ", id_bien=" . $id_bien;
+			$mysqli->query($sql);
+		}
+	}
+	
+	if ($bandera) {
+		?>
+		<tr><td>&nbsp;</td></tr>
+		<tr><td>&nbsp;</td></tr>
+		<tr><td>&nbsp;</td></tr>
+		<tr><td align="center" colspan="6"><?php echo "Uni.Presu: " . $rowUni_presu->descrip; ?></td></tr>
+		<tr><td>&nbsp;</td></tr>
+		<tr><td>&nbsp;</td></tr>
+				<tr><td align="center" colspan="10">
+		<table border="1" cellpadding="5" cellspacing="0" width="100%" align="center">
+		<tr><th>Tipo bien</th><th>Bien</th><th>Cod.barra</th><th>Cod.QR</th><th>Nro.serie</th></tr>
+		<?php
+		
+		
+		$sql = "SELECT";
+		$sql.= " bien.*, hoja_cargo_item.descrip AS hoja_cargo_item_descrip, tipo_bien.descrip AS tipo_bien_descrip";
+		$sql.= " FROM uni_presu_aux INNER JOIN bien USING(id_bien) INNER JOIN hoja_cargo_item USING(id_hoja_cargo_item) INNER JOIN tipo_bien USING(id_tipo_bien) INNER JOIN hoja_cargo USING(id_hoja_cargo)";
+		if (isset($_REQUEST['id_tipo_bien'])) {
+			$sql.= " WHERE hoja_cargo_item.id_tipo_bien=" . $_REQUEST['id_tipo_bien'];
+		}
+		$sql.= " ORDER BY tipo_bien.descrip, hoja_cargo_item.descrip";
+		
+		$rsBien = $mysqli->query($sql);
+		
+		while ($rowBien = $rsBien->fetch_object()) {
+			?>
+
+			<tr><td><?php echo $rowBien->tipo_bien_descrip; ?></td><td><?php echo $rowBien->hoja_cargo_item_descrip; ?></td><td><?php echo $rowBien->id_bien; ?></td><td><?php echo $rowBien->codigo_qr; ?></td><td><?php echo $rowBien->nro_serie; ?></td></tr>
+			
+			<?php
+		}
+		
+		?>
+		</table>
+		</td></tr>
+		<?php
+	}
+}
+	
+	
+	
+	
+	
  
 
-?>
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-	<title>Inventario Hospital</title>
-</head>
-<body>
-<input type="submit" value="Imprimir" onClick="window.print();"/>
-<table border="0" cellpadding=0 cellspacing=0 width=750 height=1% align="center">
-<tr><td align="center" colspan="6"><big>INVENTARIO HOSPITAL</big></td></tr>
-<tr><td align="center" colspan="6"><big><?php echo $_REQUEST['descrip'] ?></big></td></tr>
-<tr><td align="center" colspan="6"><?php echo date("Y-m-d") .  " - cantidad: " . $rsBien->num_rows ?></td></tr>
-<tr><td>&nbsp;</td></tr>
-<tr><td colspan="6"><hr></td></tr>
-<tr><td>&nbsp;</td></tr>
-
-<?php
-	while ($rowBien = $rsBien->fetch_object()) {
-		$sql = "SELECT id_organismo_area_servicio_destino FROM movimiento WHERE id_bien=" . $rowBien->id_bien . " ORDER BY id_movimiento DESC LIMIT 1";
-		$rsAux = $mysqli->query($sql);
-		$rowAux = $rsAux->fetch_object();
-		$rowBien->id_organismo_area_servicio_destino = $rowAux->id_organismo_area_servicio_destino;
-		
-		$sql = "SELECT CONCAT(_organismos_areas.organismo_area, ' - ', _servicios.denominacion) AS label FROM (salud1._organismos_areas_servicios INNER JOIN salud1._organismos_areas ON _organismos_areas_servicios.id_organismo_area=_organismos_areas.organismo_area_id) INNER JOIN salud1._servicios USING(id_servicio) WHERE _organismos_areas_servicios.id_organismo_area_servicio='" . $rowBien->id_organismo_area_servicio_destino . "'";
-		$rsAux = $mysqli->query($sql);
-		$rowAux = $rsAux->fetch_object();
-		$rowBien->destino = $rowAux->label;
-?>
-		<tr><td><?php echo $rowBien->descrip ?></td><td>Nro.serie: <?php echo $rowBien->nro_serie ?></td><td>Estado: <?php echo ($rowBien->estado=="1") ? "Exist." : "Baja" ?></td></tr>
-		<tr><td colspan="6">Ubicación: <?php echo $rowBien->destino ?></td></tr>
-		<tr><td colspan="6"><hr></td></tr>
-		<tr><td>&nbsp;</td></tr>
-<?php
-		
-	}
-?>
-</table>
-</body>
-</html>
-<?php
 break;
 }
 

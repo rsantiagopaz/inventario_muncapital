@@ -16,7 +16,7 @@ class class_Inventario extends class_Base
 	if ($id_hoja_cargo == "0") {
 		
 		$p->model->fecha_carga = date("Y-m-d H:i:s");
-		$p->model->usuario_carga = $_SESSION['usuario'];
+		$p->model->usuario_carga = $_SESSION['login']->usuario;
 		$p->model->estado = "C";
 		
 		$set = $this->prepararCampos($p->model, "hoja_cargo");
@@ -27,7 +27,7 @@ class class_Inventario extends class_Base
 		
 	} else {
 		
-		$p->model->usuario_carga = $_SESSION['usuario'];
+		$p->model->usuario_carga = $_SESSION['login']->usuario;
 		
 		$set = $this->prepararCampos($p->model, "hoja_cargo");
 		
@@ -151,7 +151,7 @@ class class_Inventario extends class_Base
 	$sql.= ", fecha_movimiento='" . $fecha . "'";
 	$sql.= ", tipo_movimiento='A'";
 	$sql.= ", expte_autoriza='" . $p->hoja_cargo->expte_compra . "'";
-	$sql.= ", usuario_movimiento='" . $_SESSION['usuario'] . "'";
+	$sql.= ", usuario_movimiento='" . $_SESSION['login']->usuario . "'";
 
 	$this->mysqli->query($sql);
 	$id_hoja_movimiento = $this->mysqli->insert_id;
@@ -159,7 +159,7 @@ class class_Inventario extends class_Base
 	
 	$sql = "UPDATE hoja_cargo SET ";
 	$sql.= " fecha_verific='" . $fecha . "'";
-	$sql.= ", usuario_verific='" . $_SESSION['usuario'] . "'";
+	$sql.= ", usuario_verific='" . $_SESSION['login']->usuario . "'";
 	$sql.= ", estado='V'";
 	$sql.= " WHERE id_hoja_cargo=" . $p->hoja_cargo->id_hoja_cargo;
 
@@ -247,7 +247,7 @@ class class_Inventario extends class_Base
   	
 	$p->model->fecha_movimiento = date("Y-m-d H:i:s");
 	$p->model->tipo_movimiento = "M";
-	$p->model->usuario_movimiento = $_SESSION['usuario'];
+	$p->model->usuario_movimiento = $_SESSION['login']->usuario;
 	
 	$set = $this->prepararCampos($p->model, "hoja_movimiento");
 	

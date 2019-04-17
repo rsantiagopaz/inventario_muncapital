@@ -88,6 +88,16 @@ class class_ControlAcceso
 	
 	$rs = $this->mysqli->query($sql);
 	while ($row = $rs->fetch_object()) {
+		$perfiles = new stdClass;
+		
+		$sql = "SELECT perfil_id FROM sistemas_perfiles_usuarios_oas WHERE id_oas_usuario='" . $row->id_oas_usuario . "'";
+		$rsPerfil = $this->mysqli->query($sql);
+		while ($rowPerfil = $rsPerfil->fetch_object()) {
+			$perfiles->{$rowPerfil->perfil_id} = true;
+		}
+		
+		$row->perfiles = $perfiles;
+		
 		$resultado[] = $row;
 	}
 	
