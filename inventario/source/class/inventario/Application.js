@@ -248,7 +248,7 @@ qx.Class.define("inventario.Application",
 	doc.add(toolbarMain, {left: 5, top: 2, right: "50%"});
 	
 	doc.add(new qx.ui.basic.Label("Org/Area: " + this.login.label), {left: "51%", top: 2});
-	doc.add(new qx.ui.basic.Label("Usuario: " + this._SYSusuario), {left: "51%", top: 22});
+	doc.add(new qx.ui.basic.Label("Usuario: " + this.login.usuario), {left: "51%", top: 22});
 	
 	doc.add(contenedorMain, {left: 0, top: 38, right: 0, bottom: 0});
 	}

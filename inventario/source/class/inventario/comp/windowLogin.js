@@ -44,7 +44,7 @@ qx.Class.define("inventario.comp.windowLogin",
 				var resultado = data.result;
 				
 				//alert(qx.lang.Json.stringify(data, null, 2));
-				//alert(qx.lang.Json.stringify(error, null, 2));
+
 				var item;
 				
 				for (var x in resultado) {

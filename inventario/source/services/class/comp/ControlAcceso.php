@@ -68,37 +68,32 @@ class class_ControlAcceso
   	
   	$resultado = array();
   	
-	$sql = "SELECT";
-	$sql.= "  sistemas_perfiles_usuarios_oas.id_sist_perfil_usuario_oas AS model";
-	$sql.= ", CONCAT(_organismos_areas.organismo_area, ' - ', _servicios.denominacion) AS label";
-	$sql.= ", organismo_area_id";
-	$sql.= ", oas_usuarios.id_oas_usuario";
-	$sql.= " FROM";
-	$sql.= "  sistemas_perfiles_usuarios_oas
-        INNER JOIN _sistemas_perfiles ON sistemas_perfiles_usuarios_oas.perfil_id = _sistemas_perfiles.perfil_id AND _sistemas_perfiles.perfil_id = '" . "039001" . "'
-        INNER JOIN _sistemas_usuarios ON sistemas_perfiles_usuarios_oas.id_sistema_usuario = _sistemas_usuarios.id_sistema_usuario
-        INNER JOIN oas_usuarios ON sistemas_perfiles_usuarios_oas.id_oas_usuario = oas_usuarios.id_oas_usuario
-        INNER JOIN _usuarios ON _sistemas_usuarios.SYSusuario = _usuarios.SYSusuario AND oas_usuarios.SYSusuario = _usuarios.SYSusuario AND _usuarios.SYSusuario = '" . $p->usuario . "' AND _usuarios.SYSpassword = '" . md5($p->password) . "'
-        INNER JOIN _organismos_areas_servicios ON oas_usuarios.id_organismo_area_servicio = _organismos_areas_servicios.id_organismo_area_servicio
-        INNER JOIN _organismos_areas ON _organismos_areas_servicios.id_organismo_area = _organismos_areas.organismo_area_id
-        INNER JOIN _servicios ON _organismos_areas_servicios.id_servicio = _servicios.id_servicio";
-	
-	$sql.= " ORDER BY label";
+		$sql = "SELECT * FROM _usuarios";
+		$sql.= " LEFT JOIN _organismos_areas_usuarios ON _organismos_areas_usuarios.SYSusuario = _usuarios.SYSusuario";
+		$sql.= " LEFT JOIN _organismos_areas ON _organismos_areas.organismo_area_id = _organismos_areas_usuarios.organismo_area_id";
+		//$sql.= " INNER JOIN parque ON BINARY parque.organismo_area_id = BINARY _organismos_areas_usuarios.organismo_area_id";
+		$sql.= " LEFT JOIN _organismos ON _organismos.organismo_id = _organismos_areas.organismo_id";
+		$sql.= " WHERE _usuarios.SYSusuario = BINARY '" . $p->usuario . "' AND _usuarios.SYSpassword = '" . md5($p->password) . "' AND _usuarios.SYSusuario_estado=1";
 	
 	
 	$rs = $this->mysqli->query($sql);
 	while ($row = $rs->fetch_object()) {
 		$perfiles = new stdClass;
 		
-		$sql = "SELECT perfil_id FROM sistemas_perfiles_usuarios_oas WHERE id_oas_usuario='" . $row->id_oas_usuario . "'";
+		$sql = "SELECT perfil_id FROM _sistemas_perfiles_usuarios WHERE SYSusuario='" . $row->SYSusuario . "'";
 		$rsPerfil = $this->mysqli->query($sql);
 		while ($rowPerfil = $rsPerfil->fetch_object()) {
 			$perfiles->{$rowPerfil->perfil_id} = true;
 		}
 		
-		$row->perfiles = $perfiles;
+		$rowAux = new stdClass;
 		
-		$resultado[] = $row;
+		$rowAux->perfiles = $perfiles;
+		
+		$rowAux->model = $row->organismo_area_id;
+		$rowAux->label = $row->organismo_area . " - " . $row->organismo;
+		
+		$resultado[] = $rowAux;
 	}
 	
 	return $resultado;
