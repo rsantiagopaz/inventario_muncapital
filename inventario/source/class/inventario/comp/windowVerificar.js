@@ -36,6 +36,7 @@ qx.Class.define("inventario.comp.windowVerificar",
 	
 	var txtGuarda_custodia = new qx.ui.form.TextField("");
 	txtGuarda_custodia.setRequired(true);
+	txtGuarda_custodia.setMinWidth(200);
 	txtGuarda_custodia.addListener("blur", function(e){
 		this.setValue(this.getValue().trim());
 	});
@@ -117,6 +118,11 @@ qx.Class.define("inventario.comp.windowVerificar",
 	tblSal.addListener("cellDbltap", function(e){
 		commandEditar.execute();
 	});
+	tblSal.addListener("dataEdited", function(e){
+		var data = e.getData();
+		
+		tableModelSal.setValueById("nro_serie", data.row, data.value.trim());
+	});
 	
 	var tableColumnModelSal = tblSal.getTableColumnModel();
 	
@@ -174,23 +180,45 @@ qx.Class.define("inventario.comp.windowVerificar",
 		tblSal.setValid(true);
 		
 		if (form1.validate()) {
+			var bandera = true;
 			
-			var p = {};
-			p.hoja_cargo = rowHoja_cargo;
-			p.model = qx.util.Serializer.toNativeObject(controllerForm1.getModel());
-			p.bien = tableModelSal.getDataAsMapArray();
+			var data = tableModelSal.getDataAsMapArray();
 			
-			//alert(qx.lang.Json.stringify(p, null, 2));
-							
-			var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Inventario");
-			rpc.addListener("completed", function(e){
-				var data = e.getData();
+			for (var x = 0; x <= data.length - 1; x++) {
+				if (data[x].nro_serie == "") {
+					bandera = false;
+					tblSal.setFocusedCell(2, x, true);
+					
+					tblSal.setValid(false);
+					tblSal.focus();
+		
+					sharedErrorTooltip.setLabel("Debe ingresar nro.serie");
+					sharedErrorTooltip.placeToWidget(tblSal);
+					sharedErrorTooltip.show();
+					
+					break;
+				}
+			}
+			
+			
+			if (bandera) {
+				var p = {};
+				p.hoja_cargo = rowHoja_cargo;
+				p.model = qx.util.Serializer.toNativeObject(controllerForm1.getModel());
+				p.bien = tableModelSal.getDataAsMapArray();
 				
-				btnCancelar.execute();
-				
-				this.fireDataEvent("aceptado", data.result);
-			}, this);
-			rpc.callAsyncListeners(true, "verificar_hoja_cargo", p);
+				//alert(qx.lang.Json.stringify(p, null, 2));
+								
+				var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Inventario");
+				rpc.addListener("completed", function(e){
+					var data = e.getData();
+					
+					btnCancelar.execute();
+					
+					this.fireDataEvent("aceptado", data.result);
+				}, this);
+				rpc.callAsyncListeners(true, "verificar_hoja_cargo", p);
+			}
 
 		} else {
 			form1.getValidationManager().getInvalidFormItems()[0].focus();

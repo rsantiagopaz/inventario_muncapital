@@ -120,7 +120,7 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 	
 
 		var tableModel = new qx.ui.table.model.Simple();
-		tableModel.setColumns(["F.carga", "Uni.presu.", "Proveedor", "F.factura", "N.factura", "U.carga", "F.verific.", "U.verif.", "Estado"], ["fecha_carga", "uni_presu", "proveedor", "fecha_factura", "nro_factura", "usuario_carga", "fecha_verific", "usuario_verific", "estado"]);
+		tableModel.setColumns(["F.carga", "Uni.presu.", "Proveedor", "F.factura", "Nro.factura", "Usuario carga", "F.verific.", "Usuario verif.", "Estado"], ["fecha_carga", "uni_presu", "proveedor", "fecha_factura", "nro_factura", "usuario_carga", "fecha_verific", "usuario_verific", "estado"]);
 
 		var custom = {tableColumnModel : function(obj) {
 			return new qx.ui.table.columnmodel.Resize(obj);
@@ -189,12 +189,89 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 				btnVerificar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "C");
 				
 				menu.memorizar([btnModificar, btnVerificar]);
+				
+				
+				tblItem.setFocusedCell();
+				
+		        var timer = qx.util.TimerManager.getInstance();
+		        // check for the old listener
+		        if (this.timerId != null) {
+		          // stop the old one
+		          timer.stop(this.timerId);
+		          if (this.rpc != null) this.rpc.abort(this.opaqueCallRef);
+		          this.timerId = null;
+		        }
+
+				this.timerId = timer.start(function(userData, timerId) {
+					var p = rowHoja_cargo;
+					
+					var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Inventario");
+					rpc.addListener("completed", function(e){
+						var data = e.getData();
+						
+						//alert(qx.lang.Json.stringify(data, null, 2));
+						
+						tableModelItem.setDataAsMapArray(data.result.hoja_cargo_item, true);
+						
+					}, this);
+					rpc.callAsyncListeners(true, "leer_hoja_cargo", p);
+				}, null, this, null, 200);
+				
 			}
 		});
 		
 		
 		
-		this.add(tbl, {left: 0, top: 27, right: 0, bottom: 0});
+		this.add(tbl, {left: 0, top: 27, right: 0, bottom: "41%"});
+		
+		
+		
+		
+		
+		
+	//Tabla
+
+	var tableModelItem = new qx.ui.table.model.Simple();
+	tableModelItem.setColumns(["Descripción", "Tipo bien", "Cantidad"], ["descrip", "tipo_bien_descrip", "cantidad"]);
+	tableModelItem.setColumnSortable(0, false);
+	tableModelItem.setColumnSortable(1, false);
+	tableModelItem.setColumnSortable(2, false);
+	tableModelItem.addListener("dataChanged", function(e){
+		var rowCount = tableModelItem.getRowCount();
+		
+		tblItem.setAdditionalStatusBarText(rowCount + ((rowCount == 1) ? " item" : " items"));
+	});	
+
+	var custom = {tableColumnModel : function(obj) {
+		return new qx.ui.table.columnmodel.Resize(obj);
+	}};
+	
+	var tblItem = new componente.comp.ui.ramon.table.Table(tableModelItem, custom);
+	tblItem.setHeight(200);
+	//tblTotales.toggleShowCellFocusIndicator();
+	tblItem.setShowCellFocusIndicator(false);
+	tblItem.toggleColumnVisibilityButtonVisible();
+	//tblItem.toggleStatusBarVisible();
+	
+	var tableColumnModelItem = tblItem.getTableColumnModel();
+	
+	var cellrendererNumber = new qx.ui.table.cellrenderer.Number();
+	cellrendererNumber.setNumberFormat(application.numberformatEnteroEs);
+	tableColumnModelItem.setDataCellRenderer(2, cellrendererNumber);
+	
+	var resizeBehaviorItem = tableColumnModelItem.getBehavior();
+	resizeBehaviorItem.set(0, {width:"65%", minWidth:100});
+	resizeBehaviorItem.set(1, {width:"25%", minWidth:100});
+	resizeBehaviorItem.set(2, {width:"10%", minWidth:100});
+	
+	var selectionModelItem = tblItem.getSelectionModel();
+	selectionModelItem.setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);
+	selectionModelItem.addListener("changeSelection", function(e){
+		var selectionEmpty = selectionModelItem.isSelectionEmpty();
+
+	});
+
+	this.add(tblItem, {left: 0, top: "61%", right: 0, bottom: 0});
 		
 		
 

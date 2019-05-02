@@ -218,11 +218,14 @@ qx.Class.define("inventario.Application",
 
 	var btnCerrar = new qx.ui.menu.Button("Cerrar");
 	btnCerrar.addListener("execute", function(e){
+		/*
 		var rpc = new qx.io.remote.Rpc();
 		rpc.setTimeout(10000);
 		rpc.setUrl("services/");
 		rpc.setServiceName("comp.turnos.login");
 		var result = rpc.callSync("Logout");
+		*/
+		
 		location.reload(true);
 		//viaticos.Application.Login("Identificacion de Usuario", "", this._InitAPP, this);
 	}, this);

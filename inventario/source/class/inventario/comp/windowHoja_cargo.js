@@ -8,7 +8,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	this.set({
 		caption: "Hoja de Cargo",
 		width: 700,
-		height: 700,
+		height: 650,
 		showMinimize: false,
 		showMaximize: false,
 		allowMaximize: false,

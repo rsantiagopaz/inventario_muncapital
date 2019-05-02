@@ -112,7 +112,7 @@ class class_Inventario extends class_Base
   public function method_leer_hojas_cargo($params, $error) {
   	$p = $params[0];
   	
-	$sql = "SELECT hoja_cargo.*, proveedor.descrip AS proveedor, uni_presu.descrip AS uni_presu FROM hoja_cargo LEFT JOIN proveedor USING(id_proveedor) LEFT JOIN uni_presu USING(id_uni_presu)";
+	$sql = "SELECT hoja_cargo.*, proveedor.descrip AS proveedor, uni_presu.descrip AS uni_presu FROM hoja_cargo LEFT JOIN proveedor USING(id_proveedor) LEFT JOIN uni_presu USING(id_uni_presu) ORDER BY fecha_carga DESC";
 	
 	return $this->toJson($sql);
   }
@@ -209,6 +209,33 @@ class class_Inventario extends class_Base
   }
   
   
+  public function method_leer_hoja_movimiento($params, $error) {
+  	$p = $params[0];
+  	
+  	//$resultado = new stdClass;
+  	
+	$sql = "SELECT";
+	$sql.= "  hoja_cargo_item.descrip";
+	$sql.= ", tipo_bien.descrip AS tipo_bien_descrip";
+	$sql.= ", uni_presu.descrip AS uni_presu_descrip";
+	$sql.= ", bien.id_bien";
+	$sql.= ", bien.nro_serie";
+	$sql.= ", bien.codigo_qr";
+	$sql.= ", hoja_movimiento_item.guarda_custodia";
+	$sql.= " FROM hoja_movimiento INNER JOIN hoja_movimiento_item USING(id_hoja_movimiento)";
+	$sql.= "  INNER JOIN bien USING(id_bien)";
+	$sql.= "  INNER JOIN hoja_cargo_item USING(id_hoja_cargo_item)";
+	$sql.= "  INNER JOIN tipo_bien USING(id_tipo_bien)";
+	$sql.= "  LEFT JOIN uni_presu USING(id_uni_presu)";
+	$sql.= " WHERE hoja_movimiento.id_hoja_movimiento=" . $p->id_hoja_movimiento;
+	
+	//$rs = $this->mysqli->query($sql);
+	
+	return $this->toJson($sql);
+	//return $resultado;
+  }
+  
+  
   
   public function method_leer_hojas_movimiento($params, $error) {
   	$p = $params[0];
@@ -246,7 +273,6 @@ class class_Inventario extends class_Base
   	$p = $params[0];
   	
 	$p->model->fecha_movimiento = date("Y-m-d H:i:s");
-	$p->model->tipo_movimiento = "M";
 	$p->model->usuario_movimiento = $_SESSION['login']->usuario;
 	
 	$set = $this->prepararCampos($p->model, "hoja_movimiento");
@@ -260,6 +286,8 @@ class class_Inventario extends class_Base
 	$id_hoja_movimiento = $this->mysqli->insert_id;
 	
 	foreach ($p->hoja_movimiento_item as $item) {
+		if ($p->model->tipo_movimiento == "B") $item->guarda_custodia = "";
+		
 		$sql = "INSERT hoja_movimiento_item SET id_hoja_movimiento=" . $id_hoja_movimiento . ", id_bien=" . $item->id_bien . ", guarda_custodia='" . $item->guarda_custodia . "'";
 		$this->mysqli->query($sql);
 	}
@@ -327,18 +355,22 @@ class class_Inventario extends class_Base
 	$rsBien = $this->mysqli->query($sql);
 	
 	while ($rowBien = $rsBien->fetch_object()) {
-		$sql = "SELECT hoja_movimiento_item.guarda_custodia, uni_presu.descrip AS uni_presu_descrip";
-		$sql.= " FROM hoja_movimiento_item INNER JOIN hoja_movimiento USING(id_hoja_movimiento) INNER JOIN uni_presu USING(id_uni_presu)";
+		$sql = "SELECT hoja_movimiento_item.guarda_custodia, hoja_movimiento.tipo_movimiento, uni_presu.descrip AS uni_presu_descrip";
+		$sql.= " FROM hoja_movimiento_item INNER JOIN hoja_movimiento USING(id_hoja_movimiento) LEFT JOIN uni_presu USING(id_uni_presu)";
 		$sql.= " WHERE id_bien=" . $rowBien->id_bien;
 		$sql.= " ORDER BY id_hoja_movimiento DESC LIMIT 1";
 		
 		$rsAux = $this->mysqli->query($sql);
-		$rowAux = $rsAux->fetch_object();
-		
-		$rowBien->uni_presu_descrip = $rowAux->uni_presu_descrip;
-		$rowBien->guarda_custodia = $rowAux->guarda_custodia;
-		
-		$resultado[] = $rowBien;
+		if ($rsAux->num_rows > 0) {
+			$rowAux = $rsAux->fetch_object();
+			
+			if ($rowAux->tipo_movimiento != "B") {
+				$rowBien->uni_presu_descrip = $rowAux->uni_presu_descrip;
+				$rowBien->guarda_custodia = $rowAux->guarda_custodia;
+			
+				$resultado[] = $rowBien;
+			}
+		}
 	}
 	
 	return $resultado;
