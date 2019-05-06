@@ -15,9 +15,9 @@ class class_Inventario extends class_Base
 	
 	if ($id_hoja_cargo == "0") {
 		
-		$p->model->fecha_carga = date("Y-m-d H:i:s");
-		$p->model->usuario_carga = $_SESSION['login']->usuario;
-		$p->model->estado = "C";
+		$p->model->fecha_verific = date("Y-m-d H:i:s");
+		$p->model->usuario_verific = $_SESSION['login']->usuario;
+		$p->model->estado = "V";
 		
 		$set = $this->prepararCampos($p->model, "hoja_cargo");
 		
@@ -112,7 +112,7 @@ class class_Inventario extends class_Base
   public function method_leer_hojas_cargo($params, $error) {
   	$p = $params[0];
   	
-	$sql = "SELECT hoja_cargo.*, proveedor.descrip AS proveedor, uni_presu.descrip AS uni_presu FROM hoja_cargo LEFT JOIN proveedor USING(id_proveedor) LEFT JOIN uni_presu USING(id_uni_presu) ORDER BY fecha_carga DESC";
+	$sql = "SELECT hoja_cargo.*, proveedor.descrip AS proveedor, uni_presu.descrip AS uni_presu FROM hoja_cargo LEFT JOIN proveedor USING(id_proveedor) LEFT JOIN uni_presu USING(id_uni_presu) ORDER BY fecha_verific DESC";
 	
 	return $this->toJson($sql);
   }
@@ -158,9 +158,9 @@ class class_Inventario extends class_Base
 	
 	
 	$sql = "UPDATE hoja_cargo SET ";
-	$sql.= " fecha_verific='" . $fecha . "'";
-	$sql.= ", usuario_verific='" . $_SESSION['login']->usuario . "'";
-	$sql.= ", estado='V'";
+	$sql.= " fecha_carga='" . $fecha . "'";
+	$sql.= ", usuario_carga='" . $_SESSION['login']->usuario . "'";
+	$sql.= ", estado='C'";
 	$sql.= " WHERE id_hoja_cargo=" . $p->hoja_cargo->id_hoja_cargo;
 
 	$this->mysqli->query($sql);
@@ -370,6 +370,84 @@ class class_Inventario extends class_Base
 			
 				$resultado[] = $rowBien;
 			}
+		}
+	}
+	
+	return $resultado;
+  }
+  
+  
+  public function method_leer_bienes_todos($params, $error) {
+  	$p = $params[0];
+  	
+  	$resultado = array();
+	$where = array();
+	
+	$aux = explode(" ", $p->texto);
+	foreach ($aux as $item) {
+		if ($item != "") {
+			
+			/*
+			$sql = "SELECT";
+			$sql.= "   bien.*";
+			$sql.= " , hoja_cargo_item.descrip";
+			$sql.= " , tipo_bien.descrip AS tipo_bien_descrip";
+			$sql.= " FROM bien INNER JOIN hoja_cargo_item USING(id_hoja_cargo_item) INNER JOIN tipo_bien USING(id_tipo_bien)";
+			$sql.= " WHERE hoja_cargo_item.descrip LIKE '%" . $item . "%'";
+			$sql.= "  OR id_bien LIKE '%" . $item . "%'";
+			$sql.= "  OR nro_serie LIKE '%" . $item . "%'";
+			$sql.= "  OR codigo_qr LIKE '%" . $item . "%'";
+			*/
+			
+			
+			$sql = " (hoja_cargo_item.descrip LIKE '%" . $item . "%'";
+			$sql.= "  OR id_bien LIKE '%" . $item . "%'";
+			$sql.= "  OR nro_serie LIKE '%" . $item . "%'";
+			$sql.= "  OR codigo_qr LIKE '%" . $item . "%')";
+			
+			$where[] = $sql;
+		}
+	}
+	
+	
+	$sql = "SELECT";
+	$sql.= "   bien.*";
+	$sql.= " , hoja_cargo_item.descrip";
+	$sql.= " , tipo_bien.descrip AS tipo_bien_descrip";
+	$sql.= " FROM bien INNER JOIN hoja_cargo_item USING(id_hoja_cargo_item) INNER JOIN tipo_bien USING(id_tipo_bien)";
+	$sql.= " WHERE ";
+	$sql.= implode(" AND ", $where);
+	$sql.= " ORDER BY descrip, tipo_bien_descrip, id_bien";
+
+	
+	/*
+	$sql = "SELECT bien.*, hoja_cargo_item.descrip, tipo_bien.descrip AS tipo_bien_descrip FROM bien INNER JOIN hoja_cargo_item USING(id_hoja_cargo_item) INNER JOIN tipo_bien USING(id_tipo_bien) WHERE hoja_cargo_item.descrip LIKE '%" . $p->texto . "%'";
+	$sql.= " UNION DISTINCT ";
+	$sql.= "SELECT bien.*, hoja_cargo_item.descrip, tipo_bien.descrip AS tipo_bien_descrip FROM bien INNER JOIN hoja_cargo_item USING(id_hoja_cargo_item) INNER JOIN tipo_bien USING(id_tipo_bien) WHERE id_bien LIKE '%" . $p->texto . "%'";
+	$sql.= " UNION DISTINCT ";
+	$sql.= "SELECT bien.*, hoja_cargo_item.descrip, tipo_bien.descrip AS tipo_bien_descrip FROM bien INNER JOIN hoja_cargo_item USING(id_hoja_cargo_item) INNER JOIN tipo_bien USING(id_tipo_bien) WHERE nro_serie LIKE '%" . $p->texto . "%'";
+	$sql.= " UNION DISTINCT ";
+	$sql.= "SELECT bien.*, hoja_cargo_item.descrip, tipo_bien.descrip AS tipo_bien_descrip FROM bien INNER JOIN hoja_cargo_item USING(id_hoja_cargo_item) INNER JOIN tipo_bien USING(id_tipo_bien) WHERE codigo_qr LIKE '%" . $p->texto . "%'";
+	$sql.= " ORDER BY descrip, tipo_bien_descrip, id_bien";
+	*/
+	$rsBien = $this->mysqli->query($sql);
+	
+	while ($rowBien = $rsBien->fetch_object()) {
+		$sql = "SELECT hoja_movimiento_item.guarda_custodia, hoja_movimiento.tipo_movimiento, uni_presu.descrip AS uni_presu_descrip";
+		$sql.= " FROM hoja_movimiento_item INNER JOIN hoja_movimiento USING(id_hoja_movimiento) LEFT JOIN uni_presu USING(id_uni_presu)";
+		$sql.= " WHERE id_bien=" . $rowBien->id_bien;
+		$sql.= " ORDER BY id_hoja_movimiento DESC LIMIT 1";
+		
+		$rsAux = $this->mysqli->query($sql);
+		if ($rsAux->num_rows > 0) {
+			$rowAux = $rsAux->fetch_object();
+			
+			if ($rowAux->tipo_movimiento != "B") {
+				$rowBien->uni_presu_descrip = $rowAux->uni_presu_descrip;
+				$rowBien->guarda_custodia = $rowAux->guarda_custodia;
+			}
+			
+			$resultado[] = $rowBien;
 		}
 	}
 	

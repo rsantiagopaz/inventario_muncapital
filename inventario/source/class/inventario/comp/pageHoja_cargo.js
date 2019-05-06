@@ -26,6 +26,14 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		tbl.blur();
 		tbl.setFocusedCell();
 		
+		btnModificar.setEnabled(false);
+		btnVerificar.setEnabled(false);
+		btnImprimir.setEnabled(false);
+		
+		menu.memorizar([btnModificar, btnVerificar, btnImprimir]);
+		
+		
+		
 		var p = {};
 
 		var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Inventario");
@@ -67,6 +75,8 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 			var data = e.getData();
 
 			functionActualizar(data);
+			
+			window.open("services/class/comp/Impresion.php?rutina=hoja_cargo&id_hoja_cargo=" + data);
 		});
 		
 		application.getRoot().add(win);
@@ -83,6 +93,8 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 			var data = e.getData();
 		
 			functionActualizar(data);
+			
+			window.open("services/class/comp/Impresion.php?rutina=hoja_cargo&id_hoja_cargo=" + data);
 		});
 		
 		application.getRoot().add(win);
@@ -90,7 +102,7 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		win.open();
 	});
 	
-	var btnVerificar = new qx.ui.menu.Button("Verificar...");
+	var btnVerificar = new qx.ui.menu.Button("Confirmar carga...");
 	btnVerificar.setEnabled(false);
 	btnVerificar.addListener("execute", function(e){
 		var win = new inventario.comp.windowVerificar(rowHoja_cargo);
@@ -100,6 +112,7 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		
 			functionActualizar(data);
 			
+			window.open("services/class/comp/Impresion.php?rutina=hoja_cargo&id_hoja_cargo=" + data);
 			window.open("services/class/comp/Impresion.php?rutina=imprimir_codigo&id_hoja_cargo=" + data);
 		});
 		
@@ -108,10 +121,20 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		win.open();
 	});
 	
+	var btnImprimir = new qx.ui.menu.Button("Imprimir");
+	btnImprimir.setEnabled(false);
+	btnImprimir.addListener("execute", function(e){
+		window.open("services/class/comp/Impresion.php?rutina=hoja_cargo&id_hoja_cargo=" + rowHoja_cargo.id_hoja_cargo);
+		if (rowHoja_cargo.estado == "C") {
+			window.open("services/class/comp/Impresion.php?rutina=imprimir_codigo&id_hoja_cargo=" + rowHoja_cargo.id_hoja_cargo);
+		}
+	});
+	
 	menu.add(btnAlta);
 	menu.add(btnModificar);
-	menu.addSeparator();
 	menu.add(btnVerificar);
+	menu.addSeparator();
+	menu.add(btnImprimir);
 	menu.memorizar();
 
 	
@@ -120,7 +143,7 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 	
 
 		var tableModel = new qx.ui.table.model.Simple();
-		tableModel.setColumns(["F.carga", "Uni.presu.", "Proveedor", "F.factura", "Nro.factura", "Usuario carga", "F.verific.", "Usuario verif.", "Estado"], ["fecha_carga", "uni_presu", "proveedor", "fecha_factura", "nro_factura", "usuario_carga", "fecha_verific", "usuario_verific", "estado"]);
+		tableModel.setColumns(["F.verific.", "Usuario verif.", "Uni.presu.", "Proveedor", "F.factura", "Nro.factura", "F.carga", "Usuario carga", "Estado"], ["fecha_verific", "usuario_verific", "uni_presu", "proveedor", "fecha_factura", "nro_factura", "fecha_carga", "usuario_carga", "estado"]);
 
 		var custom = {tableColumnModel : function(obj) {
 			return new qx.ui.table.columnmodel.Resize(obj);
@@ -152,13 +175,13 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		
 		var cellrendererDate2 = new qx.ui.table.cellrenderer.Date();
 		cellrendererDate2.setDateFormat(new qx.util.format.DateFormat("dd/MM/y"));
-		tableColumnModel.setDataCellRenderer(3, cellrendererDate2);
+		tableColumnModel.setDataCellRenderer(4, cellrendererDate2);
 		
 		
 		var cellrendererReplace = new qx.ui.table.cellrenderer.Replace;
 		cellrendererReplace.setReplaceMap({
 			"C" : "Cargada",
-			"V" : "Verificada"
+			"V" : "En verificación"
 		});
 		tableColumnModel.setDataCellRenderer(8, cellrendererReplace);
 
@@ -182,13 +205,15 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		selectionModel.setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);
 		selectionModel.addListener("changeSelection", function(){
 			var selectionEmpty = selectionModel.isSelectionEmpty();
+			
 			if (! selectionEmpty) {
 				rowHoja_cargo = tableModel.getRowData(tbl.getFocusedRow());
 				
-				btnModificar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "C");
-				btnVerificar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "C");
+				btnModificar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "V");
+				btnVerificar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "V");
+				btnImprimir.setEnabled(! selectionEmpty);
 				
-				menu.memorizar([btnModificar, btnVerificar]);
+				menu.memorizar([btnModificar, btnVerificar, btnImprimir]);
 				
 				
 				tblItem.setFocusedCell();

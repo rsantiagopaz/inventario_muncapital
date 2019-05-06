@@ -352,7 +352,6 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	},
 	events : 
 	{
-		"aceptado": "qx.event.type.Event",
-		"estado": "qx.event.type.Event"
+		"aceptado": "qx.event.type.Event"
 	}
 });

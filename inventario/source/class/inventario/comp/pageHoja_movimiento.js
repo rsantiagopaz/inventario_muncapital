@@ -26,6 +26,11 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 		tbl.blur();
 		tbl.setFocusedCell();
 		
+		btnImprimir.setEnabled(false);
+		menu.memorizar([btnImprimir]);
+		
+		
+		
 		var p = {};
 
 		var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Inventario");
@@ -69,6 +74,8 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 			var data = e.getData();
 			
 			functionActualizar(data);
+			
+			window.open("services/class/comp/Impresion.php?rutina=hoja_movimiento&id_hoja_movimiento=" + data);
 		});
 		
 		application.getRoot().add(win);
@@ -76,8 +83,16 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 		win.open();
 	});
 	
+	var btnImprimir = new qx.ui.menu.Button("Imprimir");
+	btnImprimir.setEnabled(false);
+	btnImprimir.addListener("execute", function(e){
+		window.open("services/class/comp/Impresion.php?rutina=hoja_movimiento&id_hoja_movimiento=" + rowHoja_movimiento.id_hoja_movimiento);
+	});
+	
 
 	menu.add(btnAlta);
+	menu.addSeparator();
+	menu.add(btnImprimir);
 	menu.memorizar();
 
 	
@@ -86,7 +101,7 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 	
 
 		var tableModel = new qx.ui.table.model.Simple();
-		tableModel.setColumns(["F.movimiento", "Uni.presu.", "Expte.autoriza", "U.movimiento", "Acción"], ["fecha_movimiento", "uni_presu_descrip", "expte_autoriza", "usuario_movimiento", "tipo_movimiento"]);
+		tableModel.setColumns(["F.movimiento", "Uni.presu.", "Expte.autoriza", "Usuario", "Acción"], ["fecha_movimiento", "uni_presu_descrip", "expte_autoriza", "usuario_movimiento", "tipo_movimiento"]);
 
 		var custom = {tableColumnModel : function(obj) {
 			return new qx.ui.table.columnmodel.Resize(obj);
@@ -145,6 +160,9 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 			var selectionEmpty = selectionModel.isSelectionEmpty();
 			if (! selectionEmpty) {
 				rowHoja_movimiento = tableModel.getRowData(tbl.getFocusedRow());
+				
+				btnImprimir.setEnabled(true);
+				menu.memorizar([btnImprimir]);
 				
 				tblItems.setFocusedCell();
 				

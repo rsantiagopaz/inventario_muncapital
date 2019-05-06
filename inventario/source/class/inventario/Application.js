@@ -195,21 +195,21 @@ qx.Class.define("inventario.Application",
 	var btnConsultas = new qx.ui.menu.Button("Consultas");
 	//btnConsultas.setEnabled(this.login.perfiles["039003"] != null);
 	btnConsultas.addListener("execute", function(e){
-		var window = new inventario.comp.windowConsultas(this);
-		window.setModal(true);
-		doc.add(window);
-		window.center();
-		window.open();
+		var win = new inventario.comp.windowConsultas(this);
+		win.setModal(true);
+		doc.add(win);
+		win.center();
+		win.open();
 	}, this);
 	//mnuVer.add(btnConsultas);
 	
 	var btnListado = new qx.ui.menu.Button("Listado...");
 	btnListado.addListener("execute", function(e){
-		var window = new inventario.comp.windowListado();
-		window.setModal(true);
-		doc.add(window);
-		window.center();
-		window.open();
+		var win = new inventario.comp.windowListado();
+		win.setModal(true);
+		doc.add(win);
+		win.center();
+		win.open();
 	}, this);
 	mnuVer.add(btnListado);
 	

@@ -6,7 +6,7 @@ qx.Class.define("inventario.comp.windowVerificar",
 	this.base(arguments);
 	
 	this.set({
-		caption: "Verificar",
+		caption: "Confirmar carga",
 		width: 700,
 		height: 500,
 		showMinimize: false,
@@ -249,7 +249,6 @@ qx.Class.define("inventario.comp.windowVerificar",
 	},
 	events : 
 	{
-		"aceptado": "qx.event.type.Event",
-		"estado": "qx.event.type.Event"
+		"aceptado": "qx.event.type.Event"
 	}
 });

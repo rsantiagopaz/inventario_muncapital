@@ -89,8 +89,6 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 	
 	
 	
-	var form2 = new qx.ui.form.Form();
-	
 	var txtDescrip = new qx.ui.form.TextField("");
 	txtDescrip.setLiveUpdate(true);
 	txtDescrip.addListener("changeValue", function(e){
@@ -129,37 +127,11 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 	txtDescrip.addListener("blur", function(e){
 		this.setValue(this.getValue().trim());
 	});
-	form2.add(txtDescrip, "Texto", null, "descrip", null, {grupo: 1, tabIndex: 11, item: {row: 0, column: 1, colSpan: 10}});
-	
+
+	gbxBuscar.add(new qx.ui.basic.Label("Texto:"), {left: 0, top: 3});
+	gbxBuscar.add(txtDescrip, {left: 40, top: 0});
 	
 
-	var btnBuscar = new qx.ui.form.Button("Buscar");
-	btnBuscar.addListener("execute", function(e){
-		var p = {};
-		p.texto = txtDescrip.getValue();
-		
-		var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Inventario");
-		rpc.addListener("completed", function(e){
-			var data = e.getData();
-			
-			//alert(qx.lang.Json.stringify(data, null, 2));
-			
-			tableModelBuscar.setDataAsMapArray(data.result, true);
-			
-		}, this);
-		rpc.addListener("failed", function(e){
-			var data = e.getData();
-			
-			alert(qx.lang.Json.stringify(data, null, 2));
-			
-		}, this);
-		rpc.callAsyncListeners(true, "leer_bienes", p);
-	});
-	//form2.addButton(btnBuscar, {grupo: 1, item: {row: 0, column: 11, colSpan: 3}});
-	
-	
-	var formView2 = new componente.comp.ui.ramon.abstractrenderer.Grid(form2, 3, 25, 1);
-	gbxBuscar.add(formView2);
 	
 	
 	
@@ -453,7 +425,7 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 			p.model = qx.util.Serializer.toNativeObject(controllerForm1.getModel());
 			p.hoja_movimiento_item = tableModelItems.getDataAsMapArray();
 			
-			alert(qx.lang.Json.stringify(p, null, 2));
+			//alert(qx.lang.Json.stringify(p, null, 2));
 							
 			var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Inventario");
 			rpc.addListener("completed", function(e){
