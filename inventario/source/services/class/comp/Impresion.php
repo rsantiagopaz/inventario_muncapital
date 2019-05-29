@@ -265,10 +265,10 @@ case "hoja_cargo" : {
 		<td align="center"><?php echo $row->nro_factura; ?></td>
 	</tr>
 	<tr><td>&nbsp;</td></tr>
-	<tr><th>Expte.compra</th><th>Expte.cobro</th><th>Guardia custodia</th><th>Usuario</th></tr>
+	<tr><th>Asunto cargo</th><th>Asunto asociado</th><th>Guardia custodia</th><th>Usuario</th></tr>
 	<tr>
-		<td align="center"><?php echo $row->expte_compra; ?></td>
-		<td align="center"><?php echo $row->expte_cobro; ?></td>
+		<td align="center"><?php echo $row->asunto_cargo; ?></td>
+		<td align="center"><?php echo $row->asunto_asociado; ?></td>
 		<td align="center"><?php echo $rowHoja_movimiento_item->guarda_custodia; ?></td>
 		<td align="center"><?php echo ($row->estado == "V") ? $row->usuario_verific : $row->usuario_carga; ?></td>
 	</tr>
@@ -498,7 +498,7 @@ case "listado_movimiento" : {
 		</tr>
 		<tr><td>&nbsp;</td></tr>
 		<tr><td colspan="20">
-		<table border="1" cellpadding="5" cellspacing="1" width="100%" align="center">
+		<table border="1" cellpadding="5" cellspacing="0" width="100%" align="center">
 		
 		
 		<tr><th>Item</th><th>Descripción</th><th>Tipo bien</th><th>Cod.barra</th><th>Nro.serie</th><th>Guarda custodia</th></tr>

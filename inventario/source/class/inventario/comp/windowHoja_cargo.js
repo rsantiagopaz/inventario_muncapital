@@ -8,7 +8,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	this.set({
 		caption: "Hoja de Cargo",
 		width: 700,
-		height: 650,
+		height: 620,
 		showMinimize: false,
 		showMaximize: false,
 		allowMaximize: false,
@@ -20,7 +20,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	this.addListenerOnce("appear", function(e){
 		var timer = qx.util.TimerManager.getInstance();
 		timer.start(function() {
-			cboUni_presu.focus();
+			lstUni_presu.focus();
 		}, null, this, null, 50);
 	}, this);
 	
@@ -31,22 +31,33 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 
 	var arrayEliminar = [];
 	
+	var boolAsunto;
+	
 	
 	
 	
 	
 	var form1 = new qx.ui.form.Form();
 	
-	var cboUni_presu = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarUni_presu"});
-	cboUni_presu.setRequired(true);
-	cboUni_presu.setMaxWidth(300);
-	var lstUni_presu = cboUni_presu.getChildControl("list");
+
+	var lstUni_presu = new qx.ui.form.SelectBox();
+	lstUni_presu.setRequired(true);
+	lstUni_presu.setMaxWidth(300);
 	
-	form1.add(cboUni_presu, "Uni.presu.", function(value) {
-		if (lstUni_presu.isSelectionEmpty()) throw new qx.core.ValidationError("Validation Error", "Debe seleccionar unidad presupuestaria");
-	}, "uni_presu", null, {grupo: 1, tabIndex: 1, item: {row: 0, column: 1, colSpan: 20}});
+	var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Parametros");
+	try {
+		var resultado = rpc.callSync("autocompletarUni_presu", {texto: ""});
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
 	
-	form1.add(lstUni_presu, null, null, "id_uni_presu");
+	for (var x in resultado) {
+		lstUni_presu.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
+	}
+	
+	form1.add(lstUni_presu, "Uni.presu.", null, "id_uni_presu", null, {grupo: 1, tabIndex: 1, item: {row: 0, column: 1, colSpan: 20}});
+	
+	//form1.add(lstUni_presu, null, null, "id_uni_presu");
 	
 	
 	var cboProveedor = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarProveedor"});
@@ -75,20 +86,50 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	form1.add(txtNro_factura, "Nro.factura", null, "nro_factura", null, {grupo: 1, item: {row: 3, column: 1, colSpan: 5}});
 	
 
-	var txtExpte_compra = new qx.ui.form.TextField("");
-	txtExpte_compra.setWidth(500);
-	txtExpte_compra.addListener("blur", function(e){
+	var txtAsunto_cargo = new qx.ui.form.TextField("");
+	//txtAsunto_cargo.setWidth(500);
+	txtAsunto_cargo.addListener("blur", function(e){
 		this.setValue(this.getValue().trim());
+		
+		var p = {};
+		p.documentacion_id = txtAsunto_cargo.getValue();
+		
+		var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Inventario");
+		rpc.addListener("completed", function(e){
+			var data = e.getData();
+
+			var aux = "";
+			
+			aux = "Documento: " + data.result.documento;
+			aux+= String.fromCharCode(13) + "Iniciador: " + data.result.documentacion_tmp_iniciador;
+			aux+= String.fromCharCode(13) + "Texto: " + data.result.documentacion_asunto;
+			
+			lblAsunto.setValue(aux);
+			
+			boolAsunto = true;
+
+		}, this);
+		rpc.addListener("failed", function(e){
+			var data = e.getData();
+			
+			lblAsunto.setValue("");
+			
+			boolAsunto = false;
+
+		}, this);
+		rpc.callAsyncListeners(true, "leer_asunto", p);
 	});
-	form1.add(txtExpte_compra, "Expte.compra", null, "expte_compra", null, {grupo: 1, item: {row: 4, column: 1, colSpan: 5}});
+	form1.add(txtAsunto_cargo, "Asunto cargo", function(value) {
+		if (! boolAsunto) throw new qx.core.ValidationError("Validation Error", "Asunto inválido");
+	}, "asunto_cargo", null, {grupo: 1, item: {row: 4, column: 1, colSpan: 5}});
 	
 	
-	var txtExpte_cobro = new qx.ui.form.TextField("");
-	txtExpte_cobro.setWidth(500);
-	txtExpte_cobro.addListener("blur", function(e){
+	var txtAsunto_asociado = new qx.ui.form.TextArea("");
+	//txtAsunto_asociado.setWidth(500);
+	txtAsunto_asociado.addListener("blur", function(e){
 		this.setValue(this.getValue().trim());
 	});
-	form1.add(txtExpte_cobro, "Expte.cobro", null, "expte_cobro", null, {grupo: 1, item: {row: 5, column: 1, colSpan: 5}});
+	form1.add(txtAsunto_asociado, "Asunto asociado", null, "asunto_asociado", null, {grupo: 1, item: {row: 5, column: 1, colSpan: 5}});
 	
 	
 	var controllerForm1 = new qx.data.controller.Form(null, form1);
@@ -98,12 +139,17 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	this.add(formView1, {left: 0, top: 0});
 	
 	
-
+	var lblAsunto = new qx.ui.form.TextArea("");
+	//lblAsunto.setRich(true);
+	lblAsunto.setReadOnly(true);
+	lblAsunto.setDecorator("main");
+	lblAsunto.setBackgroundColor("#ffffc0");
+	this.add(lblAsunto, {left: 240, top: 115, right: 0});
 	
 	
 	var gbx = new qx.ui.groupbox.GroupBox("Items");
 	gbx.setLayout(new qx.ui.layout.Canvas());
-	this.add(gbx, {left: 0, right: 0, bottom: 60});
+	this.add(gbx, {left: 0, right: 0, bottom: 50});
 	
 	
 	
@@ -111,6 +157,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	
 	var txtDescrip = new qx.ui.form.TextField("");
 	txtDescrip.setRequired(true);
+	txtDescrip.setMaxLength(200);
 	txtDescrip.setWidth(500);
 	txtDescrip.addListener("blur", function(e){
 		this.setValue(this.getValue().trim());
@@ -217,7 +264,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	}};
 	
 	var tblSal = new componente.comp.ui.ramon.table.Table(tableModelSal, custom);
-	tblSal.setHeight(200);
+	tblSal.setHeight(150);
 	//tblTotales.toggleShowCellFocusIndicator();
 	tblSal.setShowCellFocusIndicator(false);
 	tblSal.toggleColumnVisibilityButtonVisible();
@@ -243,7 +290,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 		menu.memorizar([btnEliminar]);
 	});
 
-	gbx.add(tblSal, {left: 0, top: 130, right: 0});
+	gbx.add(tblSal, {left: 0, top: 110, right: 0});
 	
 	
 	
@@ -259,6 +306,8 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 			
 			//alert(qx.lang.Json.stringify(data, null, 2));
 			
+			boolAsunto = true;
+			
 			lstUni_presu.add(new qx.ui.form.ListItem(data.result.uni_presu.label, null, data.result.uni_presu.model));
 			lstProveedor.add(new qx.ui.form.ListItem(data.result.proveedor.label, null, data.result.proveedor.model));
 			
@@ -270,11 +319,15 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 			
 			controllerForm1.setModel(aux);
 			
-			cboUni_presu.focus();
+			txtAsunto_cargo.focus();
+			lstUni_presu.focus();
+			
 		}, this);
 		rpc.callAsyncListeners(true, "leer_hoja_cargo", p);
 	} else {
-		var aux = qx.data.marshal.Json.createModel({id_hoja_cargo: "0", id_uni_presu: null, uni_presu: null, id_proveedor: null, proveedor: null, nro_factura: "", expte_compra: "", expte_cobro: "", fecha_factura: null}, true);
+		boolAsunto = false;
+		
+		var aux = qx.data.marshal.Json.createModel({id_hoja_cargo: "0", id_uni_presu: null, uni_presu: null, id_proveedor: null, proveedor: null, nro_factura: "", asunto_cargo: "", asunto_asociado: "", fecha_factura: null}, true);
 				
 		controllerForm1.setModel(aux);
 	}

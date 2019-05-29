@@ -84,6 +84,12 @@ class class_Base
 	}
 	return implode(", ", $set);
   }
+  
+  
+  public function auditoria($sql_texto, $id, $tag) {
+	$sql = "INSERT _auditoria SET fecha=NOW(), sql_texto='" . $this->mysqli->real_escape_string($sql_texto) . "', id='" . $id . "', tag='" . $tag . "', usuario='" . $_SESSION['login']->usuario . "'";
+	$this->mysqli->query($sql);
+  }
 }
 
 ?>

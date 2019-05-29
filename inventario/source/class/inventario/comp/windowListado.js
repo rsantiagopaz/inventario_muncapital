@@ -44,7 +44,7 @@ qx.Class.define("inventario.comp.windowListado",
 		var data = e.getData();
 		
 		if (data) {
-			cboUni_presu.setEnabled(true);
+			lstUni_presu.setEnabled(true);
 			cboTipo_bien.setEnabled(true);
 			cboDepartamento.setEnabled(false);
 			cboResponsable.setEnabled(false);
@@ -66,7 +66,7 @@ qx.Class.define("inventario.comp.windowListado",
 		var data = e.getData();
 
 		if (data) {
-			cboUni_presu.setEnabled(false);
+			lstUni_presu.setEnabled(false);
 			cboTipo_bien.setEnabled(false);
 			cboDepartamento.setEnabled(false);
 			cboResponsable.setEnabled(false);
@@ -87,7 +87,7 @@ qx.Class.define("inventario.comp.windowListado",
 		var data = e.getData();
 		
 		if (data) {
-			cboUni_presu.setEnabled(false);
+			lstUni_presu.setEnabled(false);
 			cboTipo_bien.setEnabled(false);
 			cboDepartamento.setEnabled(false);
 			cboResponsable.setEnabled(false);
@@ -108,7 +108,7 @@ qx.Class.define("inventario.comp.windowListado",
 		var data = e.getData();
 		
 		if (data) {
-			cboUni_presu.setEnabled(false);
+			lstUni_presu.setEnabled(false);
 			cboTipo_bien.setEnabled(false);
 			cboDepartamento.setEnabled(false);
 			cboResponsable.setEnabled(false);
@@ -125,9 +125,22 @@ qx.Class.define("inventario.comp.windowListado",
 	
 	
 	composite.add(new qx.ui.basic.Label("Uni.presu.: "), {row: 0, column: 2});
-	var cboUni_presu = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarUni_presu"});
-	var lstUni_presu = cboUni_presu.getChildControl("list");
-	composite.add(cboUni_presu, {row: 0, column: 3, colSpan: 3});
+	var lstUni_presu = new qx.ui.form.SelectBox();
+	lstUni_presu.setMaxWidth(300);
+	
+	lstUni_presu.add(new qx.ui.form.ListItem("-", null, 0));
+	
+	var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Parametros");
+	try {
+		var resultado = rpc.callSync("autocompletarUni_presu", {texto: ""});
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
+	
+	for (var x in resultado) {
+		lstUni_presu.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
+	}
+	composite.add(lstUni_presu, {row: 0, column: 3, colSpan: 3});
 	
 	
 	composite.add(new qx.ui.basic.Label("Tipo bien: "), {row: 1, column: 2});
@@ -344,8 +357,9 @@ qx.Class.define("inventario.comp.windowListado",
 		}
 		
 		
-		if (cboUni_presu.getEnabled()) {
-			if (! lstUni_presu.isSelectionEmpty()) txt+= "&id_uni_presu=" + lstUni_presu.getModelSelection().getItem(0);
+		if (lstUni_presu.getEnabled()) {
+			var model = lstUni_presu.getModelSelection().getItem(0);
+			if (model != "0") txt+= "&id_uni_presu=" + model;
 		}
 		if (cboTipo_bien.getEnabled()) {
 			if (! lstTipo_bien.isSelectionEmpty()) txt+= "&id_tipo_bien=" + lstTipo_bien.getModelSelection().getItem(0);
@@ -385,7 +399,7 @@ qx.Class.define("inventario.comp.windowListado",
 	rbtA1.setTabIndex(1);
 	rbtA2.setTabIndex(2);
 	rbtA3.setTabIndex(3);
-	cboUni_presu.setTabIndex(4);
+	lstUni_presu.setTabIndex(4);
 	cboTipo_bien.setTabIndex(5);
 	cboDepartamento.setTabIndex(6);
 	cboResponsable.setTabIndex(7);

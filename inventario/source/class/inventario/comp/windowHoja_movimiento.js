@@ -8,7 +8,7 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 	this.set({
 		caption: "Hoja de Movimiento",
 		width: 1000,
-		height: 650,
+		height: 620,
 		showMinimize: false,
 		//showMaximize: false,
 		//allowMaximize: false,
@@ -46,23 +46,33 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 		
 		if (! bandera) {
 			lstUni_presu.resetSelection();
-			cboUni_presu.setValue("");
 		}
 		
-		cboUni_presu.setEnabled(bandera);
+		lstUni_presu.setEnabled(bandera);
 		tableModelItems.setColumnEditable(6, bandera);
 		tblItems.setShowCellFocusIndicator(bandera);
 		
-		cboUni_presu.setValid(true);
+		lstUni_presu.setValid(true);
 	});
 	form1.add(slbTipo_movimiento, "Tipo acción", null, "tipo_movimiento", null, {grupo: 1, tabIndex: 1, item: {row: 0, column: 1, colSpan: 4}});
 	
-	var cboUni_presu = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarUni_presu"});
-	var lstUni_presu = cboUni_presu.getChildControl("list");
+	var lstUni_presu = new qx.ui.form.SelectBox();
+	lstUni_presu.setMaxWidth(300);
 	
-	form1.add(cboUni_presu, "Uni.presu.", null, "uni_presu", null, {grupo: 1, tabIndex: 1, item: {row: 1, column: 1, colSpan: 10}});
+	var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Parametros");
+	try {
+		var resultado = rpc.callSync("autocompletarUni_presu", {texto: ""});
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
 	
-	form1.add(lstUni_presu, null, null, "id_uni_presu");
+	for (var x in resultado) {
+		lstUni_presu.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
+	}
+	
+	form1.add(lstUni_presu, "Uni.presu.", null, "id_uni_presu", null, {grupo: 1, tabIndex: 1, item: {row: 1, column: 1, colSpan: 10}});
+	
+	//form1.add(lstUni_presu, null, null, "id_uni_presu");
 	
 	
 	var txtExpte_autoriza = new qx.ui.form.TextField("");
@@ -85,7 +95,7 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 	
 	var gbxBuscar = new qx.ui.groupbox.GroupBox("Buscar");
 	gbxBuscar.setLayout(new qx.ui.layout.Canvas());
-	this.add(gbxBuscar, {left: 0, top: 90, right: 0, bottom: "53%"});
+	this.add(gbxBuscar, {left: 0, top: 90, right: 0, bottom: "50%"});
 	
 	
 	
@@ -229,7 +239,7 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 	
 	var gbxItems = new qx.ui.groupbox.GroupBox("Items");
 	gbxItems.setLayout(new qx.ui.layout.Canvas());
-	this.add(gbxItems, {left: 0, top: "50%", right: 0, bottom: 50});
+	this.add(gbxItems, {left: 0, top: "55%", right: 0, bottom: 50});
 	
 	
 
@@ -356,7 +366,7 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 			
 			controllerForm1.setModel(aux);
 			
-			cboUni_presu.focus();
+			lstUni_presu.focus();
 		}, this);
 		rpc.callAsyncListeners(true, "leer_hoja_cargo", p);
 	} else {
@@ -373,7 +383,7 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 	
 	var btnAceptar = new qx.ui.form.Button("Aceptar");
 	btnAceptar.addListener("execute", function(e){
-		cboUni_presu.setValid(true);
+		lstUni_presu.setValid(true);
 		tblBuscar.setValid(true);
 		
 		var bandera = true;
@@ -382,11 +392,11 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 			
 			bandera = false;
 			
-			cboUni_presu.setValid(false);
-			cboUni_presu.focus();
+			lstUni_presu.setValid(false);
+			lstUni_presu.focus();
 			
 			sharedErrorTooltip.setLabel("Debe seleccionar unidad presupuestaria");
-			sharedErrorTooltip.placeToWidget(cboUni_presu);
+			sharedErrorTooltip.placeToWidget(lstUni_presu);
 			sharedErrorTooltip.show();
 		} else if (tableModelItems.getRowCount() == 0) {
 			
@@ -424,6 +434,8 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 			var p = {};
 			p.model = qx.util.Serializer.toNativeObject(controllerForm1.getModel());
 			p.hoja_movimiento_item = tableModelItems.getDataAsMapArray();
+			
+			if (slbTipo_movimiento.getSelection()[0].getModel() == "B") p.model.id_uni_presu = null;
 			
 			//alert(qx.lang.Json.stringify(p, null, 2));
 							

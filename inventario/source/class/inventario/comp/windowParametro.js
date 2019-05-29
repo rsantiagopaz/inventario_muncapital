@@ -40,20 +40,28 @@ qx.Class.define("inventario.comp.windowParametro",
 	
 	
 	
+
+	var windowProveedor = new inventario.comp.windowProveedor();
+	windowProveedor.setModal(true);
+	windowProveedor.addListener("disappear", function(e){
+		tblProveedor.focus();
+	});
+	application.getRoot().add(windowProveedor);
+	
+	
 	var gbxProveedor = new qx.ui.groupbox.GroupBox("Proveedor");
-	gbxProveedor.setWidth(350);
-	gbxProveedor.setHeight(261);
 	gbxProveedor.setLayout(new qx.ui.layout.Grow());
 	this.add(gbxProveedor, {left: "33.5%", top: 0, right: "33.5%", bottom: "51.5%"});
 	
 	var tableModelProveedor = new qx.ui.table.model.Simple();
-	tableModelProveedor.setColumns(["Descripción"], ["descrip"]);
-	tableModelProveedor.setEditable(true);
+	tableModelProveedor.setColumns(["Descripción", "CUIT"], ["descrip", "cuit"]);
 	tableModelProveedor.setColumnSortable(0, false);
+	tableModelProveedor.setColumnSortable(1, false);
 
-	var tblProveedor = new componente.comp.ui.ramon.table.tableParametro(tableModelProveedor, "proveedor");
+	var tblProveedor = new componente.comp.ui.ramon.table.tableParametro(tableModelProveedor, "proveedor", windowProveedor);
 	
 	gbxProveedor.add(tblProveedor);
+	
 	
 	
 

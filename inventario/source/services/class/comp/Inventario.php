@@ -27,7 +27,7 @@ class class_Inventario extends class_Base
 		
 	} else {
 		
-		$p->model->usuario_carga = $_SESSION['login']->usuario;
+		$p->model->usuario_verific = $_SESSION['login']->usuario;
 		
 		$set = $this->prepararCampos($p->model, "hoja_cargo");
 		
@@ -61,7 +61,7 @@ class class_Inventario extends class_Base
 		$id_hoja_cargo_item = $this->mysqli->insert_id;
 		
 		for ($i = 1; $i <= $item->cantidad; $i++) {
-			$sql = "INSERT bien SET nro_serie='', id_hoja_cargo_item=" . $id_hoja_cargo_item;
+			$sql = "INSERT bien SET imagen='', nro_serie='', id_hoja_cargo_item=" . $id_hoja_cargo_item;
 			$this->mysqli->query($sql);
 			$id_bien = $this->mysqli->insert_id;
 		}
@@ -121,6 +121,9 @@ class class_Inventario extends class_Base
   public function method_leer_hoja_cargo_item($params, $error) {
   	$p = $params[0];
   	
+	$this->removedir("temp", false);
+	
+  	
 	//$sql = "SELECT hoja_cargo_item.id_hoja_cargo_item, hoja_cargo_item.descrip AS hoja_cargo_item_descrip, tipo_bien.descrip AS tipo_bien_descrip, bien.id_bien, bien.nro_serie FROM hoja_cargo_item INNER JOIN tipo_bien USING(id_tipo_bien) INNER JOIN bien USING(id_hoja_cargo_item) WHERE id_hoja_cargo=" . $p->id_hoja_cargo . " ORDER BY hoja_cargo_item_descrip, tipo_bien_descrip, id_bien";
 	$sql = "SELECT";
 	$sql.= "  hoja_cargo_item.id_hoja_cargo_item";
@@ -150,7 +153,7 @@ class class_Inventario extends class_Base
 	$sql.= " id_uni_presu='" . $p->hoja_cargo->id_uni_presu . "'";
 	$sql.= ", fecha_movimiento='" . $fecha . "'";
 	$sql.= ", tipo_movimiento='A'";
-	$sql.= ", expte_autoriza='" . $p->hoja_cargo->expte_compra . "'";
+	$sql.= ", expte_autoriza='" . $p->hoja_cargo->asunto_cargo . "'";
 	$sql.= ", usuario_movimiento='" . $_SESSION['login']->usuario . "'";
 
 	$this->mysqli->query($sql);
@@ -190,7 +193,19 @@ class class_Inventario extends class_Base
 		$rowHoja_cargo_item = $rs->fetch_object();
 		
 		
-		$codigo_qr = $rowHoja_cargo->expte_compra . " - " . $rowHoja_cargo->expte_cobro . " - " . $p->model->guarda_custodia . " - " . $rowHoja_cargo->descrip;
+		if ($item->nro_serie=="") $item->nro_serie = $item->id_bien;
+		
+		$codigo_qr = $rowHoja_cargo->asunto_cargo;
+		$codigo_qr.= ", " . $rowHoja_cargo->asunto_asociado;
+		$codigo_qr.= ", " . $p->hoja_cargo->uni_presu;
+		$codigo_qr.= ", " . $p->model->guarda_custodia;
+		$codigo_qr.= ", " . $item->tipo_bien_descrip;
+		$codigo_qr.= ", " . $rowHoja_cargo_item->cantidad;
+		$codigo_qr.= ", " . $rowHoja_cargo_item->descrip;
+		$codigo_qr.= ", " . $item->id_bien;
+		$codigo_qr.= ", " . $rowHoja_cargo->fecha_verific;
+		$codigo_qr.= ", " . $rowHoja_cargo->fecha_carga;
+
 		
 		$sql = "UPDATE bien SET ";
 		$sql.= "  nro_serie='" . $item->nro_serie . "'";
@@ -198,6 +213,11 @@ class class_Inventario extends class_Base
 		$sql.= " WHERE id_bien=" . $item->id_bien;
 	
 		$this->mysqli->query($sql);
+		
+		if (is_file("temp/" . $item->id_bien . ".jpg")) {
+			if (is_file("documentos/" . $item->id_bien . ".jpg")) unlink("documentos/" . $item->id_bien . ".jpg");
+			rename("temp/" . $item->id_bien . ".jpg", "documentos/" . $item->id_bien . ".jpg");
+		}
 	}
 	
 	
@@ -206,6 +226,30 @@ class class_Inventario extends class_Base
 	
 	
 	return $p->hoja_cargo->id_hoja_cargo;
+  }
+  
+  
+  public function method_agregar_foto($params, $error) {
+  	$p = $params[0];
+  	
+  	if (is_file("temp/" . $p->id_bien . ".jpg")) unlink("temp/" . $p->id_bien . ".jpg");
+	rename("php-traditional-server-master/files/" . $p->uuid . "/" . $p->uploadName, "temp/" . $p->id_bien . ".jpg");
+	rmdir("php-traditional-server-master/files/" . $p->uuid);
+  }
+  
+  
+  public function method_eliminar_hoja_cargo($params, $error) {
+  	$p = $params[0];
+  	
+	$sql = "DELETE";
+	$sql.= "  hoja_cargo";
+	$sql.= " , hoja_cargo_item";
+	$sql.= " , bien";
+	$sql.= " FROM hoja_cargo";
+	$sql.= "  INNER JOIN hoja_cargo_item USING(id_hoja_cargo)";
+	$sql.= "  INNER JOIN bien USING(id_hoja_cargo_item)";
+	$sql.= " WHERE hoja_cargo.id_hoja_cargo=" . $p->id_hoja_cargo;
+	$this->mysqli->query($sql);
   }
   
   
@@ -548,6 +592,51 @@ class class_Inventario extends class_Base
 	$resultado->tipo_baja = $this->toJson("SELECT * FROM tipo_baja ORDER BY descrip");
 
 	return $resultado;
+  }
+  
+  
+  
+  public function method_leer_asunto($params, $error) {
+  	global $servidor2, $usuario2, $password2, $base2;
+  	
+  	$p = $params[0];
+  	
+	$mysqli2 = new mysqli("$servidor2", "$usuario2", "$password2", "$base2");
+	$mysqli2->query("SET NAMES 'utf8'");
+
+	$sql = "SELECT 001_documentaciones.*, 001_documentaciones_tipos.documentacion_tipo FROM 001_documentaciones INNER JOIN 001_documentaciones_tipos USING(documentacion_tipo_id) WHERE documentacion_id='" . $p->documentacion_id . "'";
+	$rs = $mysqli2->query($sql);
+	if ($rs->num_rows == 0) {
+  		$error->SetError(0, "documentacion_id");
+  		return $error;
+	} else {
+		$row = $rs->fetch_object();
+		$documento = (($row->documentacion_tipo_id=="1") ? $row->expediente_numero . "-" . $row->expediente_codigo . "-" . $row->expediente_ano : $row->documentacion_numero . "/" . $row->documentacion_numero_ano);
+		$documento = $row->documentacion_tipo . " Nro. " . $documento;
+		$row->documento = $documento;
+		
+		return $row;
+	}
+  }
+  
+  
+  
+  public function removedir($src, $root = true) {
+	if (file_exists($src)) {
+		$dir = opendir($src);
+		while (false !== ($file = readdir($dir))) {
+			if (($file != '.') && ($file != '..')) {
+				$full = $src . '/' . $file;
+				if (is_dir($full)) {
+					$this->removedir($full);
+				} else {
+					unlink($full);
+				}
+			}
+		}
+		closedir($dir);
+		if ($root) rmdir($src);
+	}
   }
 
 }

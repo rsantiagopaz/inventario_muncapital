@@ -26,11 +26,14 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		tbl.blur();
 		tbl.setFocusedCell();
 		
+		tableModelItem.setDataAsMapArray([], true);
+		
 		btnModificar.setEnabled(false);
+		btnEliminar.setEnabled(false);
 		btnVerificar.setEnabled(false);
 		btnImprimir.setEnabled(false);
 		
-		menu.memorizar([btnModificar, btnVerificar, btnImprimir]);
+		menu.memorizar([btnModificar, btnEliminar, btnVerificar, btnImprimir]);
 		
 		
 		
@@ -102,6 +105,30 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		win.open();
 	});
 	
+	var btnEliminar = new qx.ui.menu.Button("Eliminar...");
+	btnEliminar.setEnabled(false);
+	btnEliminar.addListener("execute", function(e){
+		(new dialog.Confirm({
+			"message"   : "Desea eliminar hoja cargo seleccionada?",
+			"callback"  : function(e){
+				if (e) {
+					var p = {};
+					p.id_hoja_cargo = rowHoja_cargo.id_hoja_cargo;
+					
+					var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Inventario");
+					rpc.addListener("completed", function(e){
+
+						functionActualizar();
+						
+					});
+					rpc.callAsyncListeners(true, "eliminar_hoja_cargo", p);
+				}
+			},
+			"context"   : this,
+			"image"     : "icon/48/status/dialog-warning.png"
+		})).show();
+	});
+	
 	var btnVerificar = new qx.ui.menu.Button("Confirmar carga...");
 	btnVerificar.setEnabled(false);
 	btnVerificar.addListener("execute", function(e){
@@ -134,6 +161,8 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 	menu.add(btnModificar);
 	menu.add(btnVerificar);
 	menu.addSeparator();
+	menu.add(btnEliminar);
+	menu.addSeparator();
 	menu.add(btnImprimir);
 	menu.memorizar();
 
@@ -156,7 +185,7 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		tbl.setContextMenu(menu);
 
 		tbl.addListener("cellDbltap", function(e){
-			btnModificar.execute();
+			if (btnModificar.getEnabled()) btnModificar.execute();
 		});
 		
 		
@@ -210,10 +239,11 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 				rowHoja_cargo = tableModel.getRowData(tbl.getFocusedRow());
 				
 				btnModificar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "V");
+				btnEliminar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "V");
 				btnVerificar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "V");
 				btnImprimir.setEnabled(! selectionEmpty);
 				
-				menu.memorizar([btnModificar, btnVerificar, btnImprimir]);
+				menu.memorizar([btnModificar, btnEliminar, btnVerificar, btnImprimir]);
 				
 				
 				tblItem.setFocusedCell();
