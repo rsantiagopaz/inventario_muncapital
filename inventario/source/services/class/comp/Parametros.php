@@ -57,6 +57,33 @@ class class_Parametros extends class_Base
 	
 	return $row;
   }
+  
+  
+  public function method_leer_parametros_etiqueta($params, $error) {
+  	
+	$sql = "SELECT * FROM paramet WHERE id_paramet = 1";
+	$rs = $this->mysqli->query($sql);
+	$row = $rs->fetch_object();
+	$json = json_decode($row->json);
+	
+	return $json->parametros_etiqueta;
+  }
+  
+  
+  public function method_escribir_parametros_etiqueta($params, $error) {
+  	$p = $params[0];
+  	
+	$sql = "SELECT * FROM paramet WHERE id_paramet = 1";
+	$rs = $this->mysqli->query($sql);
+	$row = $rs->fetch_object();
+	$json = json_decode($row->json);
+	
+	$json->parametros_etiqueta = $p->model;
+	$json = json_encode($json);
+	
+	$sql = "UPDATE paramet SET json='" . $json . "' WHERE id_paramet = 1";
+	$this->mysqli->query($sql);
+  }
 	
 	
   public function method_autocompletarTipo_bien($params, $error) {

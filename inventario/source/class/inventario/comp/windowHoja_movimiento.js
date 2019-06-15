@@ -75,11 +75,11 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 	//form1.add(lstUni_presu, null, null, "id_uni_presu");
 	
 	
-	var txtExpte_autoriza = new qx.ui.form.TextField("");
-	txtExpte_autoriza.addListener("blur", function(e){
+	var txtAsunto_autoriza = new qx.ui.form.TextField("");
+	txtAsunto_autoriza.addListener("blur", function(e){
 		this.setValue(this.getValue().trim());
 	});
-	form1.add(txtExpte_autoriza, "Expte.autoriza", null, "expte_autoriza", null, {grupo: 1, item: {row: 2, column: 1, colSpan: 5}});
+	form1.add(txtAsunto_autoriza, "Asunto autoriza", null, "asunto_autoriza", null, {grupo: 1, item: {row: 2, column: 1, colSpan: 5}});
 	
 
 	
@@ -101,6 +101,7 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 	
 	var txtDescrip = new qx.ui.form.TextField("");
 	txtDescrip.setLiveUpdate(true);
+	txtDescrip.setWidth(200);
 	txtDescrip.addListener("changeValue", function(e){
 		var texto = e.getData().trim();
 		
@@ -370,7 +371,7 @@ qx.Class.define("inventario.comp.windowHoja_movimiento",
 		}, this);
 		rpc.callAsyncListeners(true, "leer_hoja_cargo", p);
 	} else {
-		var aux = qx.data.marshal.Json.createModel({tipo_movimiento: "M", id_uni_presu: null, uni_presu: "", expte_autoriza: ""}, true);
+		var aux = qx.data.marshal.Json.createModel({tipo_movimiento: "M", id_uni_presu: null, uni_presu: "", asunto_autoriza: ""}, true);
 				
 		controllerForm1.setModel(aux);
 	}

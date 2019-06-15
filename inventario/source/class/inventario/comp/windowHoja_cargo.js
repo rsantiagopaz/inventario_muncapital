@@ -165,14 +165,22 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	form2.add(txtDescrip, "Descripción", null, "descrip", null, {grupo: 1, tabIndex: 11, item: {row: 0, column: 1, colSpan: 20}});
 	
 	
-	var cboTipo_bien = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarTipo_bien"});
-	cboTipo_bien.setRequired(true);
-	cboTipo_bien.setMaxWidth(300);
-	var lstTipo_bien = cboTipo_bien.getChildControl("list");
+	var lstTipo_bien = new qx.ui.form.SelectBox();
+	lstTipo_bien.setRequired(true);
+	lstTipo_bien.setMaxWidth(300);
+	var rpc = new inventario.comp.rpc.Rpc("services/", "comp.Parametros");
+	try {
+		var resultado = rpc.callSync("autocompletarTipo_bien", {texto: ""});
+	} catch (ex) {
+		alert("Sync exception: " + ex);
+	}
 	
-	form2.add(cboTipo_bien, "Tipo bien", function(value) {
-		if (lstTipo_bien.isSelectionEmpty()) throw new qx.core.ValidationError("Validation Error", "Debe seleccionar tipo bien");
-	}, "tipo_bien", null, {grupo: 1, item: {row: 1, column: 1, colSpan: 10}});
+	for (var x in resultado) {
+		lstTipo_bien.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
+	}
+	
+	
+	form2.add(lstTipo_bien, "Tipo bien", null, "tipo_bien", null, {grupo: 1, item: {row: 1, column: 1, colSpan: 10}});
 
 	
 	var txtCantidad = new componente.comp.ui.ramon.spinner.Spinner(1, 1, 10000);
@@ -202,7 +210,6 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 			tblSal.setFocusedCell(0, tableModelSal.getRowCount() - 1, true);
 			
 			form2.reset();
-			lstTipo_bien.removeAll();
 			
 			txtDescrip.focus();
 		} else {

@@ -162,6 +162,26 @@ qx.Class.define("inventario.Application",
 	}, this);
 	mnuEdicion.add(btnParametros);
 	
+	var btnParametrosEtiq = new qx.ui.menu.Button("Parámetros etiqueta...");
+	btnParametrosEtiq.addListener("execute", function(e){
+		var win = new inventario.comp.windowEtiqueta();
+		win.setModal(true);
+		doc.add(win);
+		win.center();
+		win.open();
+	}, this);
+	mnuEdicion.add(btnParametrosEtiq);
+	
+	var btnImagenes = new qx.ui.menu.Button("Imágenes...");
+	btnImagenes.addListener("execute", function(e){
+		var win = new inventario.comp.windowImagenes();
+		win.setModal(true);
+		doc.add(win);
+		win.center();
+		win.open();
+	}, this);
+	mnuEdicion.add(btnImagenes);
+	
 	
 
 	var mnuVer = new qx.ui.menu.Menu();

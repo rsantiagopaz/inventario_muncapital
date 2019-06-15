@@ -153,7 +153,7 @@ class class_Inventario extends class_Base
 	$sql.= " id_uni_presu='" . $p->hoja_cargo->id_uni_presu . "'";
 	$sql.= ", fecha_movimiento='" . $fecha . "'";
 	$sql.= ", tipo_movimiento='A'";
-	$sql.= ", expte_autoriza='" . $p->hoja_cargo->asunto_cargo . "'";
+	$sql.= ", asunto_autoriza='" . $p->hoja_cargo->asunto_cargo . "'";
 	$sql.= ", usuario_movimiento='" . $_SESSION['login']->usuario . "'";
 
 	$this->mysqli->query($sql);
@@ -196,19 +196,20 @@ class class_Inventario extends class_Base
 		if ($item->nro_serie=="") $item->nro_serie = $item->id_bien;
 		
 		$codigo_qr = $rowHoja_cargo->asunto_cargo;
-		$codigo_qr.= ", " . $rowHoja_cargo->asunto_asociado;
-		$codigo_qr.= ", " . $p->hoja_cargo->uni_presu;
-		$codigo_qr.= ", " . $p->model->guarda_custodia;
-		$codigo_qr.= ", " . $item->tipo_bien_descrip;
-		$codigo_qr.= ", " . $rowHoja_cargo_item->cantidad;
-		$codigo_qr.= ", " . $rowHoja_cargo_item->descrip;
-		$codigo_qr.= ", " . $item->id_bien;
-		$codigo_qr.= ", " . $rowHoja_cargo->fecha_verific;
-		$codigo_qr.= ", " . $rowHoja_cargo->fecha_carga;
+		$codigo_qr.= "; " . $rowHoja_cargo->asunto_asociado;
+		$codigo_qr.= "; " . $p->hoja_cargo->uni_presu;
+		$codigo_qr.= "; " . $p->model->guarda_custodia;
+		$codigo_qr.= "; " . $item->tipo_bien_descrip;
+		$codigo_qr.= "; " . $rowHoja_cargo_item->cantidad;
+		$codigo_qr.= "; " . $rowHoja_cargo_item->descrip;
+		$codigo_qr.= "; " . $item->id_bien;
+		$codigo_qr.= "; " . $rowHoja_cargo->fecha_verific;
+		$codigo_qr.= "; " . $rowHoja_cargo->fecha_carga;
 
 		
 		$sql = "UPDATE bien SET ";
-		$sql.= "  nro_serie='" . $item->nro_serie . "'";
+		$sql.= "  imagen='" . $item->imagen . "'";
+		$sql.= ", nro_serie='" . $item->nro_serie . "'";
 		$sql.= ", codigo_qr='" . $codigo_qr . "'";
 		$sql.= " WHERE id_bien=" . $item->id_bien;
 	
@@ -235,6 +236,18 @@ class class_Inventario extends class_Base
   	if (is_file("temp/" . $p->id_bien . ".jpg")) unlink("temp/" . $p->id_bien . ".jpg");
 	rename("php-traditional-server-master/files/" . $p->uuid . "/" . $p->uploadName, "temp/" . $p->id_bien . ".jpg");
 	rmdir("php-traditional-server-master/files/" . $p->uuid);
+  }
+  
+  
+  public function method_agregar_foto2($params, $error) {
+  	$p = $params[0];
+  	
+  	if (is_file("documentos/" . $p->id_bien . ".jpg")) unlink("documentos/" . $p->id_bien . ".jpg");
+	rename("php-traditional-server-master/files/" . $p->uuid . "/" . $p->uploadName, "documentos/" . $p->id_bien . ".jpg");
+	rmdir("php-traditional-server-master/files/" . $p->uuid);
+	
+	$sql = "UPDATE bien SET imagen='" . $p->uploadName . "' WHERE id_bien=" . $p->id_bien;
+	$this->mysqli->query($sql);
   }
   
   

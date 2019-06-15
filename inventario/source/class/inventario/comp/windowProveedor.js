@@ -83,7 +83,7 @@ qx.Class.define("inventario.comp.windowProveedor",
 			rpc.addListener("completed", function(e){
 				var data = e.getData();
 				
-				//alert(qx.lang.Json.stringify(data, null, 2));
+				alert(qx.lang.Json.stringify(data, null, 2));
 	
 				this.fireDataEvent("aceptado", data.result);
 				btnCancelar.execute();
@@ -92,7 +92,7 @@ qx.Class.define("inventario.comp.windowProveedor",
 			rpc.addListener("failed", function(e){
 				var data = e.getData();
 				
-				//alert(qx.lang.Json.stringify(data, null, 2));
+				alert(qx.lang.Json.stringify(data, null, 2));
 				
 				if (data.message == "cuit") {
 					txtCuit.setInvalidMessage("CUIT duplicado");

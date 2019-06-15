@@ -1,6 +1,6 @@
 <?php
 
 require("phpqrcode/phpqrcode.php");
-QRcode::png($_REQUEST['code']);
+QRcode::png(urldecode($_REQUEST['code']));
 
 ?>

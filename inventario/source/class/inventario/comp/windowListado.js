@@ -197,6 +197,7 @@ qx.Class.define("inventario.comp.windowListado",
 	
 	var txtDescrip = new qx.ui.form.TextField("");
 	txtDescrip.setLiveUpdate(true);
+	txtDescrip.setWidth(200);
 	txtDescrip.addListener("changeValue", function(e){
 		var texto = e.getData().trim();
 		

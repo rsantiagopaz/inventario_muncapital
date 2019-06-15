@@ -31,9 +31,10 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		btnModificar.setEnabled(false);
 		btnEliminar.setEnabled(false);
 		btnVerificar.setEnabled(false);
-		btnImprimir.setEnabled(false);
+		btnImprimirHoja.setEnabled(false);
+		btnImprimirCodigo.setEnabled(false);
 		
-		menu.memorizar([btnModificar, btnEliminar, btnVerificar, btnImprimir]);
+		menu.memorizar([btnModificar, btnEliminar, btnVerificar, btnImprimirHoja, btnImprimirCodigo]);
 		
 		
 		
@@ -140,7 +141,7 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 			functionActualizar(data);
 			
 			window.open("services/class/comp/Impresion.php?rutina=hoja_cargo&id_hoja_cargo=" + data);
-			window.open("services/class/comp/Impresion.php?rutina=imprimir_codigo&id_hoja_cargo=" + data);
+			window.open("services/class/comp/Impresion.php?rutina=imprimir_codigo&fila=1&id_hoja_cargo=" + data);
 		});
 		
 		application.getRoot().add(win);
@@ -148,13 +149,16 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		win.open();
 	});
 	
-	var btnImprimir = new qx.ui.menu.Button("Imprimir");
-	btnImprimir.setEnabled(false);
-	btnImprimir.addListener("execute", function(e){
+	var btnImprimirHoja = new qx.ui.menu.Button("Imprimir hoja");
+	btnImprimirHoja.setEnabled(false);
+	btnImprimirHoja.addListener("execute", function(e){
 		window.open("services/class/comp/Impresion.php?rutina=hoja_cargo&id_hoja_cargo=" + rowHoja_cargo.id_hoja_cargo);
-		if (rowHoja_cargo.estado == "C") {
-			window.open("services/class/comp/Impresion.php?rutina=imprimir_codigo&id_hoja_cargo=" + rowHoja_cargo.id_hoja_cargo);
-		}
+	});
+	
+	var btnImprimirCodigo = new qx.ui.menu.Button("Imprimir código");
+	btnImprimirCodigo.setEnabled(false);
+	btnImprimirCodigo.addListener("execute", function(e){
+		window.open("services/class/comp/Impresion.php?rutina=imprimir_codigo&fila=1&id_hoja_cargo=" + rowHoja_cargo.id_hoja_cargo);
 	});
 	
 	menu.add(btnAlta);
@@ -163,7 +167,8 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 	menu.addSeparator();
 	menu.add(btnEliminar);
 	menu.addSeparator();
-	menu.add(btnImprimir);
+	menu.add(btnImprimirHoja);
+	menu.add(btnImprimirCodigo);
 	menu.memorizar();
 
 	
@@ -172,7 +177,7 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 	
 
 		var tableModel = new qx.ui.table.model.Simple();
-		tableModel.setColumns(["F.verific.", "Usuario verif.", "Uni.presu.", "Proveedor", "F.factura", "Nro.factura", "F.carga", "Usuario carga", "Estado"], ["fecha_verific", "usuario_verific", "uni_presu", "proveedor", "fecha_factura", "nro_factura", "fecha_carga", "usuario_carga", "estado"]);
+		tableModel.setColumns(["#", "F.verific.", "Usuario verif.", "Uni.presu.", "Proveedor", "F.factura", "Nro.factura", "F.carga", "Usuario carga", "Estado"], ["id_hoja_cargo", "fecha_verific", "usuario_verific", "uni_presu", "proveedor", "fecha_factura", "nro_factura", "fecha_carga", "usuario_carga", "estado"]);
 
 		var custom = {tableColumnModel : function(obj) {
 			return new qx.ui.table.columnmodel.Resize(obj);
@@ -198,13 +203,13 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		
 		var cellrendererDate = new qx.ui.table.cellrenderer.Date();
 		cellrendererDate.setDateFormat(new qx.util.format.DateFormat("y-MM-dd HH:mm:ss"));
-		tableColumnModel.setDataCellRenderer(0, cellrendererDate);
-		tableColumnModel.setDataCellRenderer(6, cellrendererDate);
+		tableColumnModel.setDataCellRenderer(1, cellrendererDate);
+		tableColumnModel.setDataCellRenderer(7, cellrendererDate);
 		
 		
 		var cellrendererDate2 = new qx.ui.table.cellrenderer.Date();
 		cellrendererDate2.setDateFormat(new qx.util.format.DateFormat("dd/MM/y"));
-		tableColumnModel.setDataCellRenderer(4, cellrendererDate2);
+		tableColumnModel.setDataCellRenderer(5, cellrendererDate2);
 		
 		
 		var cellrendererReplace = new qx.ui.table.cellrenderer.Replace;
@@ -212,7 +217,7 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 			"C" : "Cargada",
 			"V" : "En verificación"
 		});
-		tableColumnModel.setDataCellRenderer(8, cellrendererReplace);
+		tableColumnModel.setDataCellRenderer(9, cellrendererReplace);
 
 
 		
@@ -220,11 +225,16 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 	
       // Obtain the behavior object to manipulate
 		var resizeBehavior = tableColumnModel.getBehavior();
-		//resizeBehavior.set(0, {width:"30%", minWidth:100});
-		//resizeBehavior.set(1, {width:"20%", minWidth:100});
-		//resizeBehavior.set(2, {width:"10%", minWidth:100});
-		//resizeBehavior.set(3, {width:"20%", minWidth:100});
-		//resizeBehavior.set(4, {width:"10%", minWidth:100});
+		resizeBehavior.set(0, {width:"5%", minWidth:100});
+		resizeBehavior.set(1, {width:"10%", minWidth:100});
+		resizeBehavior.set(2, {width:"8%", minWidth:100});
+		resizeBehavior.set(3, {width:"20%", minWidth:100});
+		resizeBehavior.set(4, {width:"15%", minWidth:100});
+		resizeBehavior.set(5, {width:"7%", minWidth:100});
+		resizeBehavior.set(6, {width:"9%", minWidth:100});
+		resizeBehavior.set(7, {width:"10%", minWidth:100});
+		resizeBehavior.set(8, {width:"8%", minWidth:100});
+		resizeBehavior.set(9, {width:"8%", minWidth:100});
 
 		
 		
@@ -241,9 +251,10 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 				btnModificar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "V");
 				btnEliminar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "V");
 				btnVerificar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "V");
-				btnImprimir.setEnabled(! selectionEmpty);
+				btnImprimirHoja.setEnabled(! selectionEmpty);
+				btnImprimirCodigo.setEnabled(rowHoja_cargo.estado == "C");
 				
-				menu.memorizar([btnModificar, btnEliminar, btnVerificar, btnImprimir]);
+				menu.memorizar([btnModificar, btnEliminar, btnVerificar, btnImprimirHoja, btnImprimirCodigo]);
 				
 				
 				tblItem.setFocusedCell();

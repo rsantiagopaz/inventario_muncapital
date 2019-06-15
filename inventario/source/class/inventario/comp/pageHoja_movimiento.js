@@ -101,7 +101,7 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 	
 
 		var tableModel = new qx.ui.table.model.Simple();
-		tableModel.setColumns(["F.movimiento", "Uni.presu.", "Expte.autoriza", "Usuario", "Acción"], ["fecha_movimiento", "uni_presu_descrip", "expte_autoriza", "usuario_movimiento", "tipo_movimiento"]);
+		tableModel.setColumns(["#", "F.movimiento", "Uni.presu.", "Asunto autoriza", "Usuario", "Acción"], ["id_hoja_movimiento", "fecha_movimiento", "uni_presu_descrip", "asunto_autoriza", "usuario_movimiento", "tipo_movimiento"]);
 
 		var custom = {tableColumnModel : function(obj) {
 			return new qx.ui.table.columnmodel.Resize(obj);
@@ -127,7 +127,7 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 		
 		var cellrendererDate = new qx.ui.table.cellrenderer.Date();
 		cellrendererDate.setDateFormat(new qx.util.format.DateFormat("y-MM-dd HH:mm:ss"));
-		tableColumnModel.setDataCellRenderer(0, cellrendererDate);
+		tableColumnModel.setDataCellRenderer(1, cellrendererDate);
 		
 		
 		var cellrendererReplace = new qx.ui.table.cellrenderer.Replace;
@@ -136,7 +136,7 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 			"M" : "Movimiento",
 			"B" : "Baja"
 		});
-		tableColumnModel.setDataCellRenderer(4, cellrendererReplace);
+		tableColumnModel.setDataCellRenderer(5, cellrendererReplace);
 
 
 		
@@ -144,11 +144,12 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 	
       // Obtain the behavior object to manipulate
 		var resizeBehavior = tableColumnModel.getBehavior();
-		//resizeBehavior.set(0, {width:"30%", minWidth:100});
-		//resizeBehavior.set(1, {width:"20%", minWidth:100});
-		//resizeBehavior.set(2, {width:"10%", minWidth:100});
-		//resizeBehavior.set(3, {width:"20%", minWidth:100});
-		//resizeBehavior.set(4, {width:"10%", minWidth:100});
+		resizeBehavior.set(0, {width:"10%", minWidth:100});
+		resizeBehavior.set(1, {width:"10%", minWidth:100});
+		resizeBehavior.set(2, {width:"40%", minWidth:100});
+		resizeBehavior.set(3, {width:"20%", minWidth:100});
+		resizeBehavior.set(4, {width:"10%", minWidth:100});
+		resizeBehavior.set(5, {width:"10%", minWidth:100});
 
 		
 		

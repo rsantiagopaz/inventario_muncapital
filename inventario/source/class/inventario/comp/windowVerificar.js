@@ -87,6 +87,14 @@ qx.Class.define("inventario.comp.windowVerificar",
 	}, this);
 	
 	
+	this.addListener("close", function(e){
+		this.destroy();
+	}, this);
+	
+	
+	
+	
+	
 	var application = qx.core.Init.getApplication();
 	
 	var sharedErrorTooltip = qx.ui.tooltip.Manager.getInstance().getSharedErrorTooltip();
@@ -253,7 +261,7 @@ qx.Class.define("inventario.comp.windowVerificar",
 	rpc.callAsyncListeners(true, "leer_hoja_cargo_item", p);
 
 	
-	var aux = qx.data.marshal.Json.createModel({guarda_custodia: rowHoja_cargo.uni_presu, expte_autoriza: ""}, true);
+	var aux = qx.data.marshal.Json.createModel({guarda_custodia: rowHoja_cargo.uni_presu, asunto_autoriza: ""}, true);
 				
 	controllerForm1.setModel(aux);
 	
@@ -267,7 +275,7 @@ qx.Class.define("inventario.comp.windowVerificar",
 	//this.add(gbx, {left: 0, top: 60, right: 0, bottom: 60});
 	
 	
-	btnImagen = new qx.ui.form.Button("Imagen...");
+	var btnImagen = new qx.ui.form.Button("Imagen...");
 	btnImagen.addListener("execute", function(e){
 		btnCargar.execute();
 	});
@@ -350,14 +358,16 @@ qx.Class.define("inventario.comp.windowVerificar",
 	
 	var btnCancelar = new qx.ui.form.Button("Cancelar");
 	btnCancelar.addListener("execute", function(e){
-		this.destroy();
+		this.close();
 	}, this);
 	
 	this.add(btnAceptar, {left: "35%", bottom: 0});
 	this.add(btnCancelar, {right: "35%", bottom: 0});
 	
 	
-
+	
+	btnImagen.setTabIndex(10);
+	imgImagen.setTabIndex(11);
 	chkAutogenerar.setTabIndex(14);
 	tblSal.setTabIndex(15);
 	btnAceptar.setTabIndex(16);
