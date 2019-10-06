@@ -19,70 +19,71 @@ qx.Class.define("inventario.comp.windowVerificar",
 
 	this.addListenerOnce("appear", function(e){
 		
-		var fineUploaderOptions = {
-		    // options
-			button: lblImagen.getContentElement().getDomElement(),
-			autoUpload: true,
-			multiple: false,
-			request: {
-				endpoint: 'services/php-traditional-server-master/endpoint.php'
-			},
-			validation: {
-				allowedExtensions: ['jpeg', 'jpg', 'gif', 'png'],
-				//acceptFiles: "image/png, image/jpeg",
-				acceptFiles: ".jpeg, .jpg, .gif, .png"
-            },
-		    callbacks: {
-		        onSubmit: function(id, name) {
-		        	//application.popupCargando.mostrarModal();
-		        	//imgComodato.setSource("./services/documentos/loading66.gif" + "?" + Math.random());
-		        },
-		        
-		        onError: function(id, name, errorReason, xhr) {
-		        	//alert(qx.lang.Json.stringify({id: id, name: name, errorReason: errorReason, xhr: xhr}, null, 2));
-					dialog.Dialog.error(errorReason);
-		        },
-		        
-		        onComplete: qx.lang.Function.bind(function(id, name, responseJSON, xhr) {
-		        	//application.popupCargando.ocultarModal();
-		        	
-		        	if (responseJSON.success) {
-		        		var p = {};
-		        		p.id_bien = rowData.id_bien;
-		        		p.uuid = responseJSON.uuid;
-		        		p.uploadName = responseJSON.uploadName;
-		        		
-		        		//alert(qx.lang.Json.stringify(p, null, 2));
-		        		
-						var rpc = new qx.io.remote.Rpc("services/", "comp.Inventario");
-						rpc.callAsync(qx.lang.Function.bind(function(resultado, error, id){
-							//application.popupCargando.ocultarModal();
-							
-							//alert(qx.lang.Json.stringify(resultado, null, 2));
-							//alert(qx.lang.Json.stringify(error, null, 2));
-							
-							imgImagen.setSource("./services/temp/" + rowData.id_bien + ".jpg" + "?" + Math.random());
-							
-							tableModelSal.setValueById("imagen", focusedRow, responseJSON.uploadName);
-							tblSal.focus();
-							
-						}, this), "agregar_foto", p);
-		        	} else {
-		        		//application.popupCargando.ocultarModal();
-		        	}
-		        }, this)
-		    }
-		};
-		
-		fineUploader = new qq.FineUploaderBasic(fineUploaderOptions);
-		
-
-		inp = document.getElementsByName("qqfile")[0];
-		lblImagen.setVisibility("hidden");
-		
 		var timer = qx.util.TimerManager.getInstance();
 		timer.start(function() {
+			var fineUploaderOptions = {
+			    // options
+				button: lblImagen.getContentElement().getDomElement(),
+				autoUpload: true,
+				multiple: false,
+				request: {
+					endpoint: 'services/php-traditional-server-master/endpoint.php'
+				},
+				validation: {
+					allowedExtensions: ['jpeg', 'jpg', 'gif', 'png'],
+					//acceptFiles: "image/png, image/jpeg",
+					acceptFiles: ".jpeg, .jpg, .gif, .png"
+	            },
+			    callbacks: {
+			        onSubmit: function(id, name) {
+			        	//application.popupCargando.mostrarModal();
+			        	//imgComodato.setSource("./services/documentos/loading66.gif" + "?" + Math.random());
+			        },
+			        
+			        onError: function(id, name, errorReason, xhr) {
+			        	//alert(qx.lang.Json.stringify({id: id, name: name, errorReason: errorReason, xhr: xhr}, null, 2));
+						dialog.Dialog.error(errorReason);
+			        },
+			        
+			        onComplete: qx.lang.Function.bind(function(id, name, responseJSON, xhr) {
+			        	//application.popupCargando.ocultarModal();
+			        	
+			        	if (responseJSON.success) {
+			        		var p = {};
+			        		p.id_bien = rowData.id_bien;
+			        		p.uuid = responseJSON.uuid;
+			        		p.uploadName = responseJSON.uploadName;
+			        		
+			        		//alert(qx.lang.Json.stringify(p, null, 2));
+			        		
+							var rpc = new qx.io.remote.Rpc("services/", "comp.Inventario");
+							rpc.callAsync(qx.lang.Function.bind(function(resultado, error, id){
+								//application.popupCargando.ocultarModal();
+								
+								//alert(qx.lang.Json.stringify(resultado, null, 2));
+								//alert(qx.lang.Json.stringify(error, null, 2));
+								
+								imgImagen.setSource("./services/temp/" + rowData.id_bien + ".jpg" + "?" + Math.random());
+								
+								tableModelSal.setValueById("imagen", focusedRow, responseJSON.uploadName);
+								tblSal.focus();
+								
+							}, this), "agregar_foto", p);
+			        	} else {
+			        		//application.popupCargando.ocultarModal();
+			        	}
+			        }, this)
+			    }
+			};
+			
+			fineUploader = new qq.FineUploaderBasic(fineUploaderOptions);
+			
+	
+			inp = document.getElementsByName("qqfile")[0];
+			lblImagen.setVisibility("hidden");
+		
 			tblSal.focus();
+			
 		}, null, this, null, 50);
 	}, this);
 	

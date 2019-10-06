@@ -468,7 +468,6 @@ case "hoja_movimiento" : {
 	$sql = "SELECT";
 	$sql.= "  hoja_movimiento.*";
 	$sql.= ", uni_presu.descrip AS uni_presu_descrip";
-	$sql.= ", uni_presu.jefe_unidad";
 	$sql.= " FROM hoja_movimiento LEFT JOIN uni_presu USING(id_uni_presu)";
 	$sql.= " WHERE TRUE";
 	if (isset($_REQUEST['id_hoja_movimiento'])) {
@@ -501,19 +500,11 @@ case "hoja_movimiento" : {
 	<tr><td colspan="2"><b>Acción: </b><?php echo $tipo_movimiento; ?></td><td colspan="2"><b>Asunto autoriza: </b><?php echo $rowHM->asunto_autoriza; ?></td><td colspan="2"><b>F.movimiento: </b><?php echo $rowHM->fecha_movimiento; ?></td></tr>
 	<tr><td colspan="2"><b>Observaciones: </b><?php echo $rowHM->observa; ?></td><td colspan="2"><b>Tipo acto adm.: </b><?php echo $rowHM->tipo_acto_adm; ?></td><td colspan="2"><b>Nro.acto adm.: </b><?php echo $rowHM->nro_acto_adm; ?></td></tr>
 	<tr><td>&nbsp;</td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td>&nbsp;</td></tr>
 	<?php
 	
-	if ($rowHM->tipo_movimiento == "M") {
-		?>
-		<tr><td>&nbsp;</td></tr>
-		<tr><td>Sr. <?php echo $rowHM->jefe_unidad; ?></td></tr>
-		<tr><td>S/D</td></tr>
-		<tr><td colspan="6" style="text-indent: 5em">Para informarle que, a partir de la fecha quedan/n debidamente REGISTRADO/S E INCORPORADO/S ENTRE LOS BIENES PATRIMONIALES A CARGO DE <b><?php echo $rowHM->uni_presu_descrip; ?></b>, los elementos adquiridos, mediante la referencia, detalladas abajo.</td></tr>
-		<?php
-	}
-	
 	?>
-	<tr><td>&nbsp;</td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr><td colspan="20">
 	<table border="1" cellpadding="5" cellspacing="0" width="100%" align="center">
@@ -580,10 +571,6 @@ case "listado_movimiento" : {
 	$sql.= ", uni_presu.descrip AS uni_presu_descrip";
 	$sql.= " FROM hoja_movimiento LEFT JOIN uni_presu USING(id_uni_presu)";
 	$sql.= " WHERE TRUE";
-	
-	if (isset($_REQUEST['id_uni_presu'])) {
-		$sql.= "  AND hoja_movimiento.id_uni_presu='" . $_REQUEST['id_uni_presu'] . "'";
-	}
 	if (isset($_REQUEST['tipo_movimiento'])) {
 		$sql.= "  AND tipo_movimiento='" . $_REQUEST['tipo_movimiento'] . "'";
 	}
@@ -599,13 +586,6 @@ case "listado_movimiento" : {
 	}
 	
 	$rsHoja_movimiento = $mysqli->query($sql);
-	
-	
-	if (isset($_REQUEST['id_uni_presu'])) {
-		$sql = "SELECT * FROM uni_presu WHERE id_uni_presu=" . $_REQUEST['id_uni_presu'];
-		$rsUni_presu = $mysqli->query($sql);
-		$rowUni_presu = $rsUni_presu->fetch_object();
-	}
 	
 	?>
 	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -627,11 +607,6 @@ case "listado_movimiento" : {
 	<tr><td align="center" colspan="10">Periodo:<?php echo $periodo; ?></td></tr>
 	<?php
 	
-	if (isset($_REQUEST['id_uni_presu'])) {
-		?>
-		<tr><td align="center" colspan="10">Uni.presu.: <big><?php echo $rowUni_presu->descrip; ?></big></td></tr>
-		<?php
-	}
 	if (isset($_REQUEST['tipo_movimiento'])) {
 		if ($_REQUEST['tipo_movimiento'] == "A") $tipo_movimiento = "Alta"; else if ($_REQUEST['tipo_movimiento'] == "M") $tipo_movimiento = "Movimiento"; else if ($_REQUEST['tipo_movimiento'] == "B") $tipo_movimiento = "Baja";
 		?>

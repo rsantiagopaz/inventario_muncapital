@@ -6,6 +6,42 @@ class class_Parametros extends class_Base
 {
 	
 	
+  public function method_alta_modifica_uni_presu($params, $error) {
+  	$p = $params[0];
+  	
+  	$sql = "SELECT id_uni_presu FROM uni_presu WHERE descrip='" . $p->model->descrip . "' AND id_uni_presu <> " . $p->model->id_uni_presu;
+  	$rs = $this->mysqli->query($sql);
+  	if ($rs->num_rows > 0) {
+  		$error->SetError(0, "descrip");
+  		return $error;
+  	}
+  	
+	$id = $p->model->id_uni_presu;
+	
+	$set = $this->prepararCampos($p->model, "uni_presu");
+	
+	$this->mysqli->query("START TRANSACTION");
+		
+	if ($id == "0") {
+		$sql = "INSERT uni_presu SET " . $set;
+		$this->mysqli->query($sql);
+		
+		$id = $this->mysqli->insert_id;
+		
+		$this->auditoria($sql, $id, "insert_uni_presu");
+	} else {
+		$sql = "UPDATE uni_presu SET " . $set . " WHERE id_uni_presu=" . $id;
+		$this->mysqli->query($sql);
+		
+		$this->auditoria($sql, $id, "update_uni_presu");
+	}
+	
+	$this->mysqli->query("COMMIT");
+	
+	return $id;
+  }
+	
+	
   public function method_alta_modifica_proveedor($params, $error) {
   	$p = $params[0];
   	
@@ -45,6 +81,17 @@ class class_Parametros extends class_Base
 	$this->mysqli->query("COMMIT");
 	
 	return $id_proveedor;
+  }
+  
+  
+  public function method_leer_uni_presu($params, $error) {
+  	$p = $params[0];
+  	
+	$sql = "SELECT * FROM uni_presu WHERE id_uni_presu=" . $p->id_uni_presu;
+	$rs = $this->mysqli->query($sql);
+	$row = $rs->fetch_object();
+	
+	return $row;
   }
   
   

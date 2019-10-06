@@ -91,7 +91,8 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 	var btnModificar = new qx.ui.menu.Button("Modificar...");
 	btnModificar.setEnabled(false);
 	btnModificar.addListener("execute", function(e){
-		var win = new inventario.comp.windowHoja_cargo(rowHoja_cargo);
+		rowHoja_cargo.estado == "V"
+		var win = (rowHoja_cargo.estado == "V") ? new inventario.comp.windowHoja_cargo(rowHoja_cargo) : new inventario.comp.windowHoja_cargoMod(rowHoja_cargo);
 		win.setModal(true);
 		win.addListener("aceptado", function(e){
 			var data = e.getData();
@@ -163,6 +164,7 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 	
 	menu.add(btnAlta);
 	menu.add(btnModificar);
+	menu.addSeparator();
 	menu.add(btnVerificar);
 	menu.addSeparator();
 	menu.add(btnEliminar);
@@ -190,7 +192,7 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 		tbl.setContextMenu(menu);
 
 		tbl.addListener("cellDbltap", function(e){
-			if (btnModificar.getEnabled()) btnModificar.execute();
+			//if (btnModificar.getEnabled()) btnModificar.execute();
 		});
 		
 		
@@ -248,10 +250,10 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 			if (! selectionEmpty) {
 				rowHoja_cargo = tableModel.getRowData(tbl.getFocusedRow());
 				
-				btnModificar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "V");
-				btnEliminar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "V");
-				btnVerificar.setEnabled(! selectionEmpty && rowHoja_cargo.estado == "V");
-				btnImprimirHoja.setEnabled(! selectionEmpty);
+				btnModificar.setEnabled(true);
+				btnEliminar.setEnabled(rowHoja_cargo.estado == "V");
+				btnVerificar.setEnabled(rowHoja_cargo.estado == "V");
+				btnImprimirHoja.setEnabled(true);
 				btnImprimirCodigo.setEnabled(rowHoja_cargo.estado == "C");
 				
 				menu.memorizar([btnModificar, btnEliminar, btnVerificar, btnImprimirHoja, btnImprimirCodigo]);

@@ -73,6 +73,36 @@ class class_Inventario extends class_Base
   }
   
   
+  public function method_modifica_hoja_cargo($params, $error) {
+  	$p = $params[0];
+  	
+	$id_hoja_cargo = $p->model->id_hoja_cargo;
+	
+	$this->mysqli->query("START TRANSACTION");
+	
+	if ($id_hoja_cargo == "0") {
+		
+	} else {
+		
+		$p->model->usuario_verific = ($p->usuario) ? $p->usuario : $_SESSION['login']->usuario;
+		
+		$set = $this->prepararCampos($p->model, "hoja_cargo");
+		
+		$sql = "UPDATE hoja_cargo SET " . $set . " WHERE id_hoja_cargo=" . $id_hoja_cargo;
+		$this->mysqli->query($sql);
+	}
+	
+	foreach ($p->items as $item) {
+		$sql = "UPDATE hoja_cargo_item SET descrip='" . $item->descrip . "' WHERE id_hoja_cargo_item=" . $item->id_hoja_cargo_item;
+		$this->mysqli->query($sql);
+	}
+	
+	$this->mysqli->query("COMMIT");
+
+	return $id_hoja_cargo;
+  }
+  
+  
   public function method_leer_hoja_cargo($params, $error) {
   	$p = $params[0];
   	
@@ -216,8 +246,8 @@ class class_Inventario extends class_Base
 		$this->mysqli->query($sql);
 		
 		if (is_file("temp/" . $item->id_bien . ".jpg")) {
-			if (is_file("documentos/" . $item->id_bien . ".jpg")) unlink("documentos/" . $item->id_bien . ".jpg");
-			rename("temp/" . $item->id_bien . ".jpg", "documentos/" . $item->id_bien . ".jpg");
+			if (is_file("documentos/cargos/" . $item->id_bien . ".jpg")) unlink("documentos/cargos/" . $item->id_bien . ".jpg");
+			rename("temp/" . $item->id_bien . ".jpg", "documentos/cargos/" . $item->id_bien . ".jpg");
 		}
 	}
 	
@@ -242,12 +272,21 @@ class class_Inventario extends class_Base
   public function method_agregar_foto2($params, $error) {
   	$p = $params[0];
   	
-  	if (is_file("documentos/" . $p->id_bien . ".jpg")) unlink("documentos/" . $p->id_bien . ".jpg");
-	rename("php-traditional-server-master/files/" . $p->uuid . "/" . $p->uploadName, "documentos/" . $p->id_bien . ".jpg");
+  	if (is_file("documentos/cargos/" . $p->id_bien . ".jpg")) unlink("documentos/cargos/" . $p->id_bien . ".jpg");
+	rename("php-traditional-server-master/files/" . $p->uuid . "/" . $p->uploadName, "documentos/cargos/" . $p->id_bien . ".jpg");
 	rmdir("php-traditional-server-master/files/" . $p->uuid);
 	
 	$sql = "UPDATE bien SET imagen='" . $p->uploadName . "' WHERE id_bien=" . $p->id_bien;
 	$this->mysqli->query($sql);
+  }
+  
+  
+  public function method_agregar_foto3($params, $error) {
+  	$p = $params[0];
+  	
+  	if (is_file("documentos/movimientos/0.jpg")) unlink("documentos/movimientos/0.jpg");
+	rename("php-traditional-server-master/files/" . $p->uuid . "/" . $p->uploadName, "documentos/movimientos/0.jpg");
+	rmdir("php-traditional-server-master/files/" . $p->uuid);
   }
   
   
@@ -329,8 +368,7 @@ class class_Inventario extends class_Base
   public function method_escribir_hoja_movimiento($params, $error) {
   	$p = $params[0];
   	
-	$p->model->fecha_movimiento = date("Y-m-d H:i:s");
-	$p->model->usuario_movimiento = $_SESSION['login']->usuario;
+	$p->model->usuario_movimiento = ($p->usuario) ? $p->usuario : $_SESSION['login']->usuario;
 	
 	$set = $this->prepararCampos($p->model, "hoja_movimiento");
 	
@@ -349,7 +387,8 @@ class class_Inventario extends class_Base
 		$this->mysqli->query($sql);
 	}
 	
-	
+  	if (is_file("documentos/movimientos/0.jpg")) rename("documentos/movimientos/0.jpg", "documentos/movimientos/" . $id_hoja_movimiento . ".jpg");
+  	
 	$this->mysqli->query("COMMIT");
 	
 	return $id_hoja_movimiento;
@@ -421,7 +460,7 @@ class class_Inventario extends class_Base
 		if ($rsAux->num_rows > 0) {
 			$rowAux = $rsAux->fetch_object();
 			
-			if ($rowAux->tipo_movimiento != "B") {
+			if ($p->bajas || $rowAux->tipo_movimiento != "B") {
 				$rowBien->uni_presu_descrip = $rowAux->uni_presu_descrip;
 				$rowBien->guarda_custodia = $rowAux->guarda_custodia;
 			

@@ -1,4 +1,4 @@
-qx.Class.define("inventario.comp.windowProveedor",
+qx.Class.define("inventario.comp.windowUni_presu",
 {
 	extend : componente.comp.ui.ramon.window.Window,
 	construct : function (caption, icon)
@@ -35,34 +35,15 @@ qx.Class.define("inventario.comp.windowProveedor",
 	txtDescrip.addListener("blur", function(e){
 		this.setValue(this.getValue().trim());
 	});
-	form.add(txtDescrip, "Descripción (fantasía)", null, "descrip");
+	form.add(txtDescrip, "Descripción", null, "descrip");
 	
 	var txtRazon = new qx.ui.form.TextField("");
-	txtRazon.setRequired(true);
 	txtRazon.setMinWidth(200);
 	txtRazon.addListener("blur", function(e){
 		this.setValue(this.getValue().trim());
 	});
-	form.add(txtRazon, "Razón social", null, "razon_social");
+	form.add(txtRazon, "Jefe unidad", null, "jefe_unidad");
 	
-	
-	var txtCuit = new qx.ui.form.TextField("");
-	txtCuit.setRequired(true);
-	txtCuit.addListener("blur", function(e){
-		this.setValue(this.getValue().trim());
-	});
-	form.add(txtCuit, "CUIT", null, "cuit");
-	
-	
-	var slbCategoria = new qx.ui.form.SelectBox();
-	slbCategoria.add(new qx.ui.form.ListItem("Responsable Inscripto", null, "01"));
-	slbCategoria.add(new qx.ui.form.ListItem("Responsable no Inscripto", null, "02"));
-	slbCategoria.add(new qx.ui.form.ListItem("No Responsable", null, "03"));
-	slbCategoria.add(new qx.ui.form.ListItem("Exento", null, "04"));
-	slbCategoria.add(new qx.ui.form.ListItem("Consumidor Final", null, "05"));
-	slbCategoria.add(new qx.ui.form.ListItem("Monotributo", null, "06"));
-	slbCategoria.add(new qx.ui.form.ListItem("No categorizado", null, "07"));
-	form.add(slbCategoria, "Categoria IVA", null, "categoria_iva");
 	
 	
 	var controllerForm = this.controllerForm = new qx.data.controller.Form(null, form);
@@ -94,18 +75,14 @@ qx.Class.define("inventario.comp.windowProveedor",
 				
 				//alert(qx.lang.Json.stringify(data, null, 2));
 				
-				if (data.message == "cuit") {
-					txtCuit.setInvalidMessage("CUIT duplicado");
-					txtCuit.setValid(false);
-					txtCuit.focus();
-				} else if (data.message == "descrip") {
+				if (data.message == "descrip") {
 					txtDescrip.setInvalidMessage("Descripción duplicada");
 					txtDescrip.setValid(false);
 					txtDescrip.focus();
 				}
 			}, this);
 			
-			rpc.callAsyncListeners(true, "alta_modifica_proveedor", p);
+			rpc.callAsyncListeners(true, "alta_modifica_uni_presu", p);
 			
 		} else {
 			form.getValidationManager().getInvalidFormItems()[0].focus();
@@ -114,7 +91,6 @@ qx.Class.define("inventario.comp.windowProveedor",
 	
 	var btnCancelar = new qx.ui.form.Button("Cancelar");
 	btnCancelar.addListener("execute", function(e){
-		txtCuit.setValid(true);
 		txtDescrip.setValid(true);
 		
 		this.close();
@@ -131,9 +107,9 @@ qx.Class.define("inventario.comp.windowProveedor",
 			var aux;
 			
 			if (rowData == null) {
-				this.setCaption("Nuevo proveedor");
+				this.setCaption("Nueva unidad presupuestaria");
 		
-				aux = qx.data.marshal.Json.createModel({id_proveedor: "0", descrip: "", razon_social: "", cuit: "", categoria_iva: "01"}, true);
+				aux = qx.data.marshal.Json.createModel({id_uni_presu: "0", descrip: "", jefe_unidad: ""}, true);
 				
 				this.controllerForm.setModel(aux);
 			
@@ -141,7 +117,7 @@ qx.Class.define("inventario.comp.windowProveedor",
 				this.setActive(true);
 				this.focus();
 			} else {
-				this.setCaption("Modificar proveedor");
+				this.setCaption("Modificar unidad presupuestaria");
 				
 				var p = rowData;
 				
@@ -158,7 +134,7 @@ qx.Class.define("inventario.comp.windowProveedor",
 					this.focus();
 				}, this);
 				
-				rpc.callAsyncListeners(true, "leer_proveedor", p);
+				rpc.callAsyncListeners(true, "leer_uni_presu", p);
 			}
 
 		}

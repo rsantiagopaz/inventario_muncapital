@@ -101,7 +101,7 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 	
 
 		var tableModel = new qx.ui.table.model.Simple();
-		tableModel.setColumns(["#", "F.movimiento", "Uni.presu.", "Asunto autoriza", "Usuario", "Acción"], ["id_hoja_movimiento", "fecha_movimiento", "uni_presu_descrip", "asunto_autoriza", "usuario_movimiento", "tipo_movimiento"]);
+		tableModel.setColumns(["#", "F.movimiento", "Uni.presu.", "Asunto autoriza", "Usuario", "Imagen", "Acción"], ["id_hoja_movimiento", "fecha_movimiento", "uni_presu_descrip", "asunto_autoriza", "usuario_movimiento", "imagen", "tipo_movimiento"]);
 
 		var custom = {tableColumnModel : function(obj) {
 			return new qx.ui.table.columnmodel.Resize(obj);
@@ -114,7 +114,9 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 		tbl.setContextMenu(menu);
 
 		tbl.addListener("cellDbltap", function(e){
-			
+			if (tbl.getFocusedColumn() == 5 && rowHoja_movimiento.imagen) {
+				window.open("services/documentos/movimientos/" + rowHoja_movimiento.id_hoja_movimiento + ".jpg" + "?" + Math.random());
+			}
 		});
 		
 		
@@ -136,7 +138,7 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 			"M" : "Movimiento",
 			"B" : "Baja"
 		});
-		tableColumnModel.setDataCellRenderer(5, cellrendererReplace);
+		tableColumnModel.setDataCellRenderer(6, cellrendererReplace);
 
 
 		
@@ -146,10 +148,11 @@ qx.Class.define("inventario.comp.pageHoja_movimiento",
 		var resizeBehavior = tableColumnModel.getBehavior();
 		resizeBehavior.set(0, {width:"10%", minWidth:100});
 		resizeBehavior.set(1, {width:"10%", minWidth:100});
-		resizeBehavior.set(2, {width:"40%", minWidth:100});
+		resizeBehavior.set(2, {width:"30%", minWidth:100});
 		resizeBehavior.set(3, {width:"20%", minWidth:100});
 		resizeBehavior.set(4, {width:"10%", minWidth:100});
 		resizeBehavior.set(5, {width:"10%", minWidth:100});
+		resizeBehavior.set(6, {width:"10%", minWidth:100});
 
 		
 		

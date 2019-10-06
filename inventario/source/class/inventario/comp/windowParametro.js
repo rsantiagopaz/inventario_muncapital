@@ -22,7 +22,7 @@ qx.Class.define("inventario.comp.windowParametro",
 	
 	var application = qx.core.Init.getApplication();
 	
-	
+	/*
 	var gbxUni_presu = new qx.ui.groupbox.GroupBox("Unidad presupuestaria");
 	gbxUni_presu.setWidth(350);
 	gbxUni_presu.setHeight(261);
@@ -35,6 +35,31 @@ qx.Class.define("inventario.comp.windowParametro",
 	tableModelUni_presu.setColumnSortable(0, false);
 
 	var tblUni_presu = new componente.comp.ui.ramon.table.tableParametro(tableModelUni_presu, "uni_presu");
+	
+	gbxUni_presu.add(tblUni_presu);
+	*/
+	
+	
+	
+	
+	var windowUni_presu = new inventario.comp.windowUni_presu();
+	windowUni_presu.setModal(true);
+	windowUni_presu.addListener("disappear", function(e){
+		tblUni_presu.focus();
+	});
+	application.getRoot().add(windowUni_presu);
+	
+	
+	var gbxUni_presu = new qx.ui.groupbox.GroupBox("Unidad presupuestaria");
+	gbxUni_presu.setLayout(new qx.ui.layout.Grow());
+	this.add(gbxUni_presu, {left: 0, top: 0, right: "66.5%", bottom: "51.5%"});
+	
+	var tableModelUni_presu = new qx.ui.table.model.Simple();
+	tableModelUni_presu.setColumns(["Descripción", "Jefe unidad"], ["descrip", "jefe_unidad"]);
+	tableModelUni_presu.setColumnSortable(0, false);
+	tableModelUni_presu.setColumnSortable(1, false);
+
+	var tblUni_presu = new componente.comp.ui.ramon.table.tableParametro(tableModelUni_presu, "uni_presu", windowUni_presu);
 	
 	gbxUni_presu.add(tblUni_presu);
 	

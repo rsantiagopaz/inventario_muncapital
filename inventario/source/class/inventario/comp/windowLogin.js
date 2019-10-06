@@ -1,16 +1,16 @@
 qx.Class.define("inventario.comp.windowLogin",
 {
 	extend : componente.comp.ui.ramon.window.Window,
-	construct : function ()
+	construct : function (caption, showClose)
 	{
 	this.base(arguments);
 	
 	this.set({
-		caption: "Identificación de usuario",
+		caption: caption,
 		//width: 500,
 		//height: 160,
 		movable: false,
-		showClose: false,
+		showClose: showClose,
 		showMinimize: false,
 		showMaximize: false,
 		allowMaximize: false,

@@ -66,7 +66,7 @@ qx.Class.define("inventario.comp.windowListado",
 		var data = e.getData();
 
 		if (data) {
-			lstUni_presu.setEnabled(false);
+			lstUni_presu.setEnabled(true);
 			cboTipo_bien.setEnabled(false);
 			cboDepartamento.setEnabled(false);
 			cboResponsable.setEnabled(false);
@@ -121,10 +121,15 @@ qx.Class.define("inventario.comp.windowListado",
 	//composite.add(rbtA4, {row: 4, column: 0});
 	rgpA.add(rbtA4);
 	
+
+	
+	composite.add(new qx.ui.basic.Label("Tipo bien: "), {row: 0, column: 2});
+	var cboTipo_bien = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarTipo_bien"});
+	var lstTipo_bien = cboTipo_bien.getChildControl("list");
+	composite.add(cboTipo_bien, {row: 0, column: 3, colSpan: 3});	
 	
 	
-	
-	composite.add(new qx.ui.basic.Label("Uni.presu.: "), {row: 0, column: 2});
+	composite.add(new qx.ui.basic.Label("Uni.presu.: "), {row: 1, column: 2});
 	var lstUni_presu = new qx.ui.form.SelectBox();
 	lstUni_presu.setMaxWidth(300);
 	
@@ -140,13 +145,9 @@ qx.Class.define("inventario.comp.windowListado",
 	for (var x in resultado) {
 		lstUni_presu.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
 	}
-	composite.add(lstUni_presu, {row: 0, column: 3, colSpan: 3});
+	composite.add(lstUni_presu, {row: 1, column: 3, colSpan: 3});
 	
 	
-	composite.add(new qx.ui.basic.Label("Tipo bien: "), {row: 1, column: 2});
-	var cboTipo_bien = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarTipo_bien"});
-	var lstTipo_bien = cboTipo_bien.getChildControl("list");
-	composite.add(cboTipo_bien, {row: 1, column: 3, colSpan: 3});
 	
 
 	composite.add(new qx.ui.basic.Label("Acción: "), {row: 2, column: 2});
@@ -400,8 +401,8 @@ qx.Class.define("inventario.comp.windowListado",
 	rbtA1.setTabIndex(1);
 	rbtA2.setTabIndex(2);
 	rbtA3.setTabIndex(3);
-	lstUni_presu.setTabIndex(4);
-	cboTipo_bien.setTabIndex(5);
+	cboTipo_bien.setTabIndex(4);
+	lstUni_presu.setTabIndex(5);
 	cboDepartamento.setTabIndex(6);
 	cboResponsable.setTabIndex(7);
 	dtfDesde.setTabIndex(8);

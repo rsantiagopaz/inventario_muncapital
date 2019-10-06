@@ -60,7 +60,7 @@ qx.Class.define("inventario.comp.windowImagenes",
 						var rpc = new qx.io.remote.Rpc("services/", "comp.Inventario");
 						rpc.callAsync(function(resultado, error, id){
 							
-							imgImagen.setSource("./services/documentos/" + rowData.id_bien + ".jpg" + "?" + Math.random());
+							imgImagen.setSource("./services/documentos/cargos/" + rowData.id_bien + ".jpg" + "?" + Math.random());
 							
 							tableModelBuscar.setValueById("imagen", focusedRow, responseJSON.uploadName);
 							tblBuscar.focus();
@@ -251,7 +251,7 @@ qx.Class.define("inventario.comp.windowImagenes",
 			btnImagen.setEnabled(true);
 			btnImprimir.setEnabled(true);
 			
-			imgImagen.setSource("./services/documentos/" + rowData.id_bien + ".jpg" + "?" + Math.random());
+			imgImagen.setSource("./services/documentos/cargos/" + rowData.id_bien + ".jpg" + "?" + Math.random());
 		}
 	});
 

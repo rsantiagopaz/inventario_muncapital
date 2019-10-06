@@ -66,7 +66,7 @@ qx.Class.define("inventario.Application",
       
     
       
-      var win = new inventario.comp.windowLogin();
+      var win = new inventario.comp.windowLogin("Identificación de usuario", false);
       win.setModal(true);
       win.addListenerOnce("appear", function(e){
         win.center();
