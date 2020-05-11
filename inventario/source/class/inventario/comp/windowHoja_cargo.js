@@ -157,7 +157,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	
 	var txtDescrip = new qx.ui.form.TextField("");
 	txtDescrip.setRequired(true);
-	txtDescrip.setMaxLength(200);
+	txtDescrip.setMaxLength(250);
 	txtDescrip.setWidth(500);
 	txtDescrip.addListener("blur", function(e){
 		this.setValue(this.getValue().trim());
