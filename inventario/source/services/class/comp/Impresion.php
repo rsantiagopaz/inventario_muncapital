@@ -412,7 +412,7 @@ case "hoja_cargo" : {
 	<tr><td colspan="6">
 	<table border="1" cellpadding="5" cellspacing="0" width="100%" align="center">
 	
-	<tr><th>Item</th><th>Cantidad</th><th>Descripción</th><th>Tipo bien</th><th colspan="2">Precio uni.</th><th colspan="2">Precio total</th></tr>
+	<tr><th>Item</th><th>Cantidad</th><th>Descripción</th><th>Tipo bien</th><th>Precio uni.</th><th>Precio total</th></tr>
 	<?php
 	
 	$contador = 0;
@@ -425,10 +425,12 @@ case "hoja_cargo" : {
 	
 	$rs = $mysqli->query($sql);
 	while ($row = $rs->fetch_object()) {
+		$row->cantidad = (int) $row->cantidad;
+		$row->precio_uni = (float) $row->precio_uni;
 		$contador+= 1;
 		
 		?>
-		<tr><td align="center"><?php echo $contador; ?></td><td align="center"><?php echo $row->cantidad; ?></td><td><?php echo $row->descrip; ?></td><td><?php echo $row->tipo_bien_descrip; ?></td><td colspan="2">&nbsp;</td><td colspan="2">&nbsp;</td></tr>
+		<tr><td align="center"><?php echo $contador; ?></td><td align="center"><?php echo $row->cantidad; ?></td><td><?php echo $row->descrip; ?></td><td><?php echo $row->tipo_bien_descrip; ?></td><td align="right"><?php echo number_format($row->precio_uni, 2, ",", "."); ?></td><td align="right"><?php echo number_format($row->precio_uni * $row->cantidad, 2, ",", "."); ?></td></tr>
 		<?php
 	}
 		

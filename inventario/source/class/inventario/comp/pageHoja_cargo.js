@@ -300,10 +300,11 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 	//Tabla
 
 	var tableModelItem = new qx.ui.table.model.Simple();
-	tableModelItem.setColumns(["Descripción", "Tipo bien", "Cantidad"], ["descrip", "tipo_bien_descrip", "cantidad"]);
+	tableModelItem.setColumns(["Descripción", "Tipo bien", "Precio uni.", "Cantidad"], ["descrip", "tipo_bien_descrip", "precio_uni", "cantidad"]);
 	tableModelItem.setColumnSortable(0, false);
 	tableModelItem.setColumnSortable(1, false);
 	tableModelItem.setColumnSortable(2, false);
+	tableModelItem.setColumnSortable(3, false);
 	tableModelItem.addListener("dataChanged", function(e){
 		var rowCount = tableModelItem.getRowCount();
 		
@@ -323,14 +324,19 @@ qx.Class.define("inventario.comp.pageHoja_cargo",
 	
 	var tableColumnModelItem = tblItem.getTableColumnModel();
 	
-	var cellrendererNumber = new qx.ui.table.cellrenderer.Number();
-	cellrendererNumber.setNumberFormat(application.numberformatEnteroEs);
-	tableColumnModelItem.setDataCellRenderer(2, cellrendererNumber);
+	var cellrendererNumber1 = new qx.ui.table.cellrenderer.Number();
+	cellrendererNumber1.setNumberFormat(application.numberformatMontoEs);
+	tableColumnModelItem.setDataCellRenderer(2, cellrendererNumber1);
+	
+	var cellrendererNumber2 = new qx.ui.table.cellrenderer.Number();
+	cellrendererNumber2.setNumberFormat(application.numberformatEnteroEs);
+	tableColumnModelItem.setDataCellRenderer(3, cellrendererNumber2);
 	
 	var resizeBehaviorItem = tableColumnModelItem.getBehavior();
-	resizeBehaviorItem.set(0, {width:"65%", minWidth:100});
-	resizeBehaviorItem.set(1, {width:"25%", minWidth:100});
-	resizeBehaviorItem.set(2, {width:"10%", minWidth:100});
+	resizeBehaviorItem.set(0, {width:"60%", minWidth:100});
+	resizeBehaviorItem.set(1, {width:"21%", minWidth:100});
+	resizeBehaviorItem.set(2, {width:"11%", minWidth:100});
+	resizeBehaviorItem.set(3, {width:"8%", minWidth:100});
 	
 	var selectionModelItem = tblItem.getSelectionModel();
 	selectionModelItem.setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);

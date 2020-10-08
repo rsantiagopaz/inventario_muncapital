@@ -8,7 +8,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	this.set({
 		caption: "Hoja de Cargo",
 		width: 700,
-		height: 620,
+		height: 650,
 		showMinimize: false,
 		showMaximize: false,
 		allowMaximize: false,
@@ -18,8 +18,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	this.setLayout(new qx.ui.layout.Canvas());
 
 	this.addListenerOnce("appear", function(e){
-		var timer = qx.util.TimerManager.getInstance();
-		timer.start(function() {
+		timerManager.start(function() {
 			lstUni_presu.focus();
 		}, null, this, null, 50);
 	}, this);
@@ -33,6 +32,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	
 	var boolAsunto;
 	
+	var timerManager = qx.util.TimerManager.getInstance();
 	
 	
 	
@@ -83,7 +83,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	txtNro_factura.addListener("blur", function(e){
 		this.setValue(this.getValue().trim());
 	});
-	form1.add(txtNro_factura, "Nro.factura", null, "nro_factura", null, {grupo: 1, item: {row: 3, column: 1, colSpan: 5}});
+	form1.add(txtNro_factura, "Nro.factura", null, "nro_factura", null, {grupo: 1, item: {row: 2, column: 7, colSpan: 5}});
 	
 
 	var txtAsunto_cargo = new qx.ui.form.TextField("");
@@ -121,7 +121,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	});
 	form1.add(txtAsunto_cargo, "Asunto cargo", function(value) {
 		if (! boolAsunto) throw new qx.core.ValidationError("Validation Error", "Asunto inválido");
-	}, "asunto_cargo", null, {grupo: 1, item: {row: 4, column: 1, colSpan: 5}});
+	}, "asunto_cargo", null, {grupo: 1, item: {row: 3, column: 1, colSpan: 5}});
 	
 	
 	var txtAsunto_asociado = new qx.ui.form.TextArea("");
@@ -129,7 +129,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	txtAsunto_asociado.addListener("blur", function(e){
 		this.setValue(this.getValue().trim());
 	});
-	form1.add(txtAsunto_asociado, "Asunto asociado", null, "asunto_asociado", null, {grupo: 1, item: {row: 5, column: 1, colSpan: 5}});
+	form1.add(txtAsunto_asociado, "Asunto asociado", null, "asunto_asociado", null, {grupo: 1, item: {row: 4, column: 1, colSpan: 5}});
 	
 	
 	var controllerForm1 = new qx.data.controller.Form(null, form1);
@@ -144,18 +144,18 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	lblAsunto.setReadOnly(true);
 	lblAsunto.setDecorator("main");
 	lblAsunto.setBackgroundColor("#ffffc0");
-	this.add(lblAsunto, {left: 240, top: 115, right: 0});
+	this.add(lblAsunto, {left: 240, top: 90, right: 0});
 	
 	
 	var gbx = new qx.ui.groupbox.GroupBox("Items");
 	gbx.setLayout(new qx.ui.layout.Canvas());
-	this.add(gbx, {left: 0, right: 0, bottom: 50});
+	this.add(gbx, {left: 0, right: 0, top: 180, bottom: 50});
 	
 	
 	
 	var form2 = new qx.ui.form.Form();
 	
-	var txtDescrip = new qx.ui.form.TextField("");
+	var txtDescrip = new qx.ui.form.TextArea("");
 	txtDescrip.setRequired(true);
 	txtDescrip.setMaxLength(250);
 	txtDescrip.setWidth(500);
@@ -179,19 +179,24 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 		lstTipo_bien.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
 	}
 	
-	
 	form2.add(lstTipo_bien, "Tipo bien", null, "tipo_bien", null, {grupo: 1, item: {row: 1, column: 1, colSpan: 10}});
 
+	var txtPrecio_uni = new componente.comp.ui.ramon.spinner.Spinner(0, 0, 10000000);
+	txtPrecio_uni.setNumberFormat(application.numberformatMontoEn);
+	txtPrecio_uni.getChildControl("upbutton").setVisibility("excluded");
+	txtPrecio_uni.getChildControl("downbutton").setVisibility("excluded");
+	txtPrecio_uni.setSingleStep(0);
+	txtPrecio_uni.setPageStep(0);
+	form2.add(txtPrecio_uni, "Precio uni.", null, "precio_uni", null, {grupo: 1, item: {row: 2, column: 1, colSpan: 4}});
 	
 	var txtCantidad = new componente.comp.ui.ramon.spinner.Spinner(1, 1, 10000);
-	txtCantidad.setMaxWidth(60);
 	txtCantidad.setMaxHeight(23);
 	txtCantidad.setNumberFormat(application.numberformatEnteroEn);
 	txtCantidad.getChildControl("upbutton").setVisibility("excluded");
 	txtCantidad.getChildControl("downbutton").setVisibility("excluded");
 	txtCantidad.setSingleStep(0);
 	txtCantidad.setPageStep(0);
-	form2.add(txtCantidad, "Cantidad", null, "cantidad", null, {grupo: 1, item: {row: 2, column: 1, colSpan: 3}});
+	form2.add(txtCantidad, "Cantidad", null, "cantidad", null, {grupo: 1, item: {row: 3, column: 1, colSpan: 3}});
 
 	
 	
@@ -202,6 +207,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 			p.descrip = txtDescrip.getValue();
 			p.id_tipo_bien = lstTipo_bien.getSelection()[0].getModel();
 			p.tipo_bien_descrip = lstTipo_bien.getSelection()[0].getLabel();
+			p.precio_uni = txtPrecio_uni.getValue();
 			p.cantidad = txtCantidad.getValue();
 			
 			sharedErrorTooltip.hide();
@@ -211,16 +217,21 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 			
 			form2.reset();
 			
-			txtDescrip.focus();
+			timerManager.start(function() {
+				txtDescrip.focus();
+			}, null, this, null, 50);
+
 		} else {
-			form2.getValidationManager().getInvalidFormItems()[0].focus();
+			timerManager.start(function() {
+				form2.getValidationManager().getInvalidFormItems()[0].focus();
+			}, null, this, null, 50);
 		}
 	});
-	form2.addButton(btnAgregar, {grupo: 1, item: {row: 2, column: 15, colSpan: 3}});
+	form2.addButton(btnAgregar, {grupo: 1, item: {row: 3, column: 15, colSpan: 3}});
 	
 	
 	//var formView2 = new qx.ui.form.renderer.Single(form2);
-	var formView2 = new componente.comp.ui.ramon.abstractrenderer.Grid(form2, 3, 25, 1);
+	var formView2 = new componente.comp.ui.ramon.abstractrenderer.Grid(form2, 5, 25, 1);
 	gbx.add(formView2);
 	
 	
@@ -256,7 +267,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	//Tabla
 
 	var tableModelSal = new qx.ui.table.model.Simple();
-	tableModelSal.setColumns(["Descripción", "Tipo bien", "Cantidad"], ["descrip", "tipo_bien_descrip", "cantidad"]);
+	tableModelSal.setColumns(["Descripción", "Tipo bien", "P.uni.", "Cant."], ["descrip", "tipo_bien_descrip", "precio_uni", "cantidad"]);
 	tableModelSal.setColumnSortable(0, false);
 	tableModelSal.setColumnSortable(1, false);
 	tableModelSal.setColumnSortable(2, false);
@@ -280,14 +291,19 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 	
 	var tableColumnModelSal = tblSal.getTableColumnModel();
 	
-	var cellrendererNumber = new qx.ui.table.cellrenderer.Number();
-	cellrendererNumber.setNumberFormat(application.numberformatEnteroEs);
-	tableColumnModelSal.setDataCellRenderer(2, cellrendererNumber);
+	var cellrendererNumber1 = new qx.ui.table.cellrenderer.Number();
+	cellrendererNumber1.setNumberFormat(application.numberformatMontoEs);
+	tableColumnModelSal.setDataCellRenderer(2, cellrendererNumber1);
+	
+	var cellrendererNumber2 = new qx.ui.table.cellrenderer.Number();
+	cellrendererNumber2.setNumberFormat(application.numberformatEnteroEs);
+	tableColumnModelSal.setDataCellRenderer(3, cellrendererNumber2);
 	
 	var resizeBehavior = tableColumnModelSal.getBehavior();
-	resizeBehavior.set(0, {width:"65%", minWidth:100});
-	resizeBehavior.set(1, {width:"25%", minWidth:100});
-	resizeBehavior.set(2, {width:"10%", minWidth:100});
+	resizeBehavior.set(0, {width:"60%", minWidth:100});
+	resizeBehavior.set(1, {width:"21%", minWidth:100});
+	resizeBehavior.set(2, {width:"11%", minWidth:100});
+	resizeBehavior.set(3, {width:"8%", minWidth:100});
 	
 	var selectionModelSal = tblSal.getSelectionModel();
 	selectionModelSal.setSelectionMode(qx.ui.table.selection.Model.SINGLE_SELECTION);
@@ -297,7 +313,7 @@ qx.Class.define("inventario.comp.windowHoja_cargo",
 		menu.memorizar([btnEliminar]);
 	});
 
-	gbx.add(tblSal, {left: 0, top: 110, right: 0});
+	gbx.add(tblSal, {left: 0, top: 180, right: 0});
 	
 	
 	
